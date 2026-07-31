@@ -4,23 +4,29 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Beleef de Recreatiebranche - Hackathon</title>
-    <!-- Tailwind CSS via CDN untuk styling cepat & ringan -->
+    <!-- Tailwind CSS via CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        /* Utility class untuk menyembunyikan layar secara instan */
         .hidden-screen { display: none !important; }
         
-        /* Animasi masuk untuk kartu */
         @keyframes popIn {
             0% { transform: scale(0.9); opacity: 0; }
             100% { transform: scale(1); opacity: 1; }
         }
         .animate-pop { animation: popIn 0.3s ease-out forwards; }
+        
+        @keyframes shrink { from { width: 100%; } to { width: 0%; } }
+
+        /* Mencegah layar ikut scroll saat kartu digeser di HP */
+        #card-content { touch-action: none; cursor: grab; }
+        #card-content:active { cursor: grabbing; }
+        
+        /* Transisi mulus saat kartu dilepas tapi tidak cukup jauh */
+        .snap-back { transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); }
     </style>
 </head>
-<body class="bg-slate-200 text-slate-800 font-sans antialiased min-h-screen flex items-center justify-center p-4">
+<body class="bg-slate-200 text-slate-800 font-sans antialiased min-h-screen flex items-center justify-center p-4 select-none">
 
-    <!-- Container Utama (Ukuran Mobile untuk kenyamanan interaksi) -->
     <div id="app" class="w-full max-w-md bg-white rounded-3xl shadow-2xl overflow-hidden min-h-[600px] flex flex-col relative border-4 border-slate-50">
 
         <!-- ========================================== -->
@@ -36,40 +42,74 @@
         </div>
 
         <!-- ========================================== -->
+        <!-- SCREEN 1.5: VIBE CHECK -->
+        <!-- ========================================== -->
+        <div id="screen-vibe" class="hidden-screen flex-1 flex flex-col items-center justify-center p-6 bg-slate-50">
+            <h2 class="text-3xl font-black mb-2 text-slate-800 text-center tracking-tight">Apa Vibe Kamu?</h2>
+            <p class="text-slate-500 mb-8 text-center font-medium">Biar kami sesuaikan profesi yang paling pas dengan gaya mainmu.</p>
+            
+            <div id="vibe-buttons" class="w-full space-y-4">
+                <button onclick="selectVibe('lapangan')" class="w-full bg-white border-2 border-slate-200 hover:border-emerald-500 hover:bg-emerald-50 p-4 rounded-2xl flex items-center gap-4 transition-all shadow-sm active:scale-95">
+                    <div class="text-4xl bg-slate-100 p-3 rounded-xl">🏕️</div>
+                    <div class="text-left">
+                        <div class="text-lg font-bold text-slate-700">Anak Alam & Lapangan</div>
+                        <div class="text-sm text-slate-400">Gak betah duduk diam</div>
+                    </div>
+                </button>
+                <button onclick="selectVibe('layar')" class="w-full bg-white border-2 border-slate-200 hover:border-blue-500 hover:bg-blue-50 p-4 rounded-2xl flex items-center gap-4 transition-all shadow-sm active:scale-95">
+                    <div class="text-4xl bg-slate-100 p-3 rounded-xl">💻</div>
+                    <div class="text-left">
+                        <div class="text-lg font-bold text-slate-700">Anak Tech & Logika</div>
+                        <div class="text-sm text-slate-400">Suka ngoprek & di balik layar</div>
+                    </div>
+                </button>
+                <button onclick="selectVibe('sosial')" class="w-full bg-white border-2 border-slate-200 hover:border-purple-500 hover:bg-purple-50 p-4 rounded-2xl flex items-center gap-4 transition-all shadow-sm active:scale-95">
+                    <div class="text-4xl bg-slate-100 p-3 rounded-xl">🎉</div>
+                    <div class="text-left">
+                        <div class="text-lg font-bold text-slate-700">Anak Nongkrong & Acara</div>
+                        <div class="text-sm text-slate-400">Senang ketemu orang baru</div>
+                    </div>
+                </button>
+            </div>
+
+            <div id="vibe-loading" class="hidden mt-10 text-center flex-col items-center">
+                <div class="w-10 h-10 border-4 border-blue-200 border-t-blue-500 rounded-full animate-spin mb-4"></div>
+                <p class="font-bold text-blue-600 animate-pulse">Meracik peran rahasiamu...</p>
+            </div>
+        </div>
+
+        <!-- ========================================== -->
         <!-- SCREEN 2: GAMEPLAY (SWIPE CARDS) -->
         <!-- ========================================== -->
-        <div id="screen-game" class="hidden-screen flex-1 flex flex-col p-6 bg-slate-50">
-            <!-- Header Status -->
+        <div id="screen-game" class="hidden-screen flex-1 flex flex-col p-6 bg-slate-50 relative overflow-hidden">
             <div class="flex justify-between items-center mb-6">
                 <span class="text-sm font-bold text-slate-400 bg-white px-3 py-1 rounded-full shadow-sm">
                     Kartu <span id="card-counter">1</span>/5
                 </span>
-                <!-- Badge ini hanya muncul kalau URL mengandung ?mode=lobx -->
                 <span id="mode-badge" class="text-xs px-3 py-1 bg-red-100 text-red-600 rounded-full font-bold hidden border border-red-200">
                     LOBX Mode
                 </span>
             </div>
             
-            <!-- Area Kartu Interaktif -->
-            <div id="card-content" class="flex-1 bg-white border-2 border-slate-100 rounded-3xl flex flex-col items-center justify-center p-8 text-center shadow-lg mb-8 animate-pop">
-                <div class="text-8xl mb-6 drop-shadow-md" id="card-icon">🎯</div>
-                <h2 class="text-2xl font-black mb-3 text-slate-800 leading-tight" id="card-title">Suka Mengatur Acara?</h2>
-                <p class="text-slate-500 font-medium text-lg" id="card-desc">Bikin jadwal aktivitas seru dari pagi sampai malam.</p>
+            <!-- Area Kartu Interaktif dengan Logika Drag -->
+            <div id="card-content" class="flex-1 bg-white border-2 border-slate-100 rounded-3xl flex flex-col items-center justify-center p-8 text-center shadow-lg mb-8 relative z-10 w-full max-w-sm mx-auto">
+                <div class="text-8xl mb-6 drop-shadow-md pointer-events-none" id="card-icon">🎯</div>
+                <h2 class="text-2xl font-black mb-3 text-slate-800 leading-tight pointer-events-none" id="card-title">Judul</h2>
+                <p class="text-slate-500 font-medium text-lg pointer-events-none" id="card-desc">Deskripsi</p>
+                
+                <!-- Indikator transparan saat swipe (Nope / Like) -->
+                <div id="badge-nope" class="absolute top-6 right-6 border-4 border-red-500 text-red-500 font-black text-2xl px-2 py-1 rounded-lg transform rotate-12 opacity-0 transition-opacity">NOPE</div>
+                <div id="badge-like" class="absolute top-6 left-6 border-4 border-green-500 text-green-500 font-black text-2xl px-2 py-1 rounded-lg transform -rotate-12 opacity-0 transition-opacity">LIKE</div>
             </div>
 
-            <!-- Tombol Kontrol (Sebagai ganti swipe fisik untuk MVP) -->
-            <div class="flex justify-between gap-4 mt-auto">
-                <button onclick="handleAction('no')" class="flex-1 bg-white border-b-4 border-slate-200 text-slate-500 hover:bg-red-50 hover:text-red-500 hover:border-red-200 font-bold py-5 rounded-2xl transition active:border-b-0 active:translate-y-1 text-lg">
-                    ✖️ Skip
-                </button>
-                <button onclick="handleAction('yes')" class="flex-1 bg-blue-500 border-b-4 border-blue-700 hover:bg-blue-600 text-white font-bold py-5 rounded-2xl shadow-sm transition active:border-b-0 active:translate-y-1 text-lg">
-                    ❤️ Tarik!
-                </button>
+            <!-- Petunjuk UI -->
+            <div class="text-center mt-auto mb-4 text-slate-400 font-bold text-sm">
+                Geser Kiri (Skip) ⟷ Geser Kanan (Suka)
             </div>
         </div>
 
         <!-- ========================================== -->
-        <!-- SCREEN 3: LAYAR KESIMPULAN (PAYLOAD) -->
+        <!-- SCREEN 3: LAYAR KESIMPULAN -->
         <!-- ========================================== -->
         <div id="screen-result" class="hidden-screen flex-1 flex flex-col items-center justify-center p-8 text-center bg-gradient-to-br from-teal-400 to-emerald-600 text-white">
             <div class="text-7xl mb-6">✨</div>
@@ -80,13 +120,11 @@
                 Event & Animasi
             </div>
             
-            <!-- Aksi Mode Sekolah (Santai, tanpa batas waktu) -->
             <div id="school-actions" class="w-full hidden space-y-3">
                 <button class="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold py-4 rounded-xl transition">Pelajari Peran Ini</button>
                 <button class="w-full bg-emerald-500 hover:bg-emerald-400 text-white font-bold py-4 rounded-xl border-2 border-emerald-300 transition">Bagikan ke Teman</button>
             </div>
 
-            <!-- Aksi Mode LOBX Pameran (Hitung mundur reset otomatis) -->
             <div id="lobx-actions" class="w-full hidden mt-4">
                 <div class="w-full bg-white/20 rounded-full h-2 mb-4">
                     <div class="bg-white h-2 rounded-full animate-[shrink_5s_linear_forwards]"></div>
@@ -98,22 +136,23 @@
     </div>
 
     <script>
-        // --- 1. DATA SEEDING (Sesuai Syarat: Tanpa API, Bisa Offline) ---
+        // --- 1. DATA SEEDING ---
         const cards = [
             { icon: "📱", title: "Social Media Ninja?", desc: "Suka bikin konten viral dan ngurusin *campaign* sosmed?" },
             { icon: "🔧", title: "Naluri Ngoprek?", desc: "Ngebenerin alat rusak atau mesin itu panggilan jiwa?" },
             { icon: "🎉", title: "Party Planner?", desc: "Paling jago ngatur jadwal dan bikin suasana acara pecah?" },
-            { icon: "💻", title: "Tech & Logic?", desc: "Ngelola sistem reservasi online, *database*, dan jaringan WiFi?" },
-            { icon: "🌱", title: "Anak Alam Banget?", desc: "Lebih suka kerja di luar ruangan merawat lanskap dan lingkungan?" }
+            { icon: "💻", title: "Tech & Logic?", desc: "Ngelola sistem reservasi online, *database*, dan WiFi?" },
+            { icon: "🌱", title: "Anak Alam Banget?", desc: "Lebih suka kerja di luar ruangan merawat lanskap?" }
         ];
 
         let currentIndex = 0;
-        let currentMode = 'sekolah'; // Mode Default
+        let currentMode = 'sekolah';
         let resetTimer = null;
 
         // --- 2. DEKLARASI KOMPONEN DOM ---
         const screens = {
             title: document.getElementById('screen-title'),
+            vibe: document.getElementById('screen-vibe'),
             game: document.getElementById('screen-game'),
             result: document.getElementById('screen-result')
         };
@@ -122,30 +161,49 @@
             icon: document.getElementById('card-icon'),
             title: document.getElementById('card-title'),
             desc: document.getElementById('card-desc'),
-            counter: document.getElementById('card-counter')
+            counter: document.getElementById('card-counter'),
+            badgeNope: document.getElementById('badge-nope'),
+            badgeLike: document.getElementById('badge-like')
         };
 
-        // --- 3. DETEKSI LINGKUNGAN (Pameran vs Sekolah) ---
+        // --- 3. DETEKSI LINGKUNGAN ---
         window.onload = () => {
             const urlParams = new URLSearchParams(window.location.search);
-            // Cek jika URL adalah: domain.com/?mode=lobx
             if (urlParams.get('mode') === 'lobx') {
                 currentMode = 'lobx';
                 document.getElementById('mode-badge').classList.remove('hidden');
             }
         };
 
-        // --- 4. LOGIKA PERMAINAN ---
+        // --- 4. LOGIKA PERMAINAN UTAMA ---
         function startGame() {
-            currentIndex = 0;
-            renderCard();
-            switchScreen('game');
+            switchScreen('vibe');
+        }
+
+        function selectVibe(vibeChoice) {
+            document.getElementById('vibe-buttons').classList.add('hidden');
+            document.getElementById('vibe-loading').classList.remove('hidden');
+            document.getElementById('vibe-loading').classList.add('flex');
+            
+            setTimeout(() => {
+                document.getElementById('vibe-buttons').classList.remove('hidden');
+                document.getElementById('vibe-loading').classList.add('hidden');
+                document.getElementById('vibe-loading').classList.remove('flex');
+                
+                currentIndex = 0;
+                renderCard();
+                switchScreen('game');
+            }, 1500);
         }
 
         function renderCard() {
-            // Trigger animasi ulang dengan me-remove lalu add class
+            domCard.container.style.transform = '';
+            domCard.container.classList.remove('snap-back');
+            domCard.badgeNope.style.opacity = '0';
+            domCard.badgeLike.style.opacity = '0';
+
             domCard.container.classList.remove('animate-pop');
-            void domCard.container.offsetWidth; // Trigger reflow magic
+            void domCard.container.offsetWidth; 
             domCard.container.classList.add('animate-pop');
 
             const cardData = cards[currentIndex];
@@ -155,10 +213,9 @@
             domCard.counter.innerText = currentIndex + 1;
         }
 
-        function handleAction(choice) {
-            // Logika: Lanjut ke kartu berikutnya
+        function handleSwipe(direction) {
+            // Arah: 'left' (Nope) atau 'right' (Like)
             currentIndex++;
-            
             if (currentIndex < cards.length) {
                 renderCard();
             } else {
@@ -168,16 +225,10 @@
 
         function finishGame() {
             switchScreen('result');
-
-            // Eksekusi percabangan fitur berdasarkan parameter URL
             if (currentMode === 'lobx') {
                 document.getElementById('lobx-actions').classList.remove('hidden');
                 document.getElementById('school-actions').classList.add('hidden');
-                
-                // RESET INSTAN: Membersihkan DOM dan kembali ke layar awal dalam 5 detik
-                resetTimer = setTimeout(() => {
-                    resetApp();
-                }, 5000);
+                resetTimer = setTimeout(() => { resetApp(); }, 5000);
             } else {
                 document.getElementById('school-actions').classList.remove('hidden');
                 document.getElementById('lobx-actions').classList.add('hidden');
@@ -193,9 +244,71 @@
             Object.values(screens).forEach(s => s.classList.add('hidden-screen'));
             screens[targetScreen].classList.remove('hidden-screen');
         }
+
+        // --- 5. LOGIKA DRAG & SWIPE KARTU ---
+        let isDragging = false;
+        let startX = 0;
+        let currentX = 0;
+        const swipeThreshold = 100; // Jarak piksel minimal untuk dianggap swipe
+
+        function onDragStart(e) {
+            isDragging = true;
+            startX = e.type.includes('mouse') ? e.pageX : e.touches[0].clientX;
+            domCard.container.classList.remove('snap-back'); // Matikan animasi agar mengikuti jari
+        }
+
+        function onDragMove(e) {
+            if (!isDragging) return;
+            const x = e.type.includes('mouse') ? e.pageX : e.touches[0].clientX;
+            currentX = x - startX;
+            
+            // Kalkulasi Rotasi dan Pergerakan
+            const rotate = currentX * 0.05;
+            domCard.container.style.transform = `translateX(${currentX}px) rotate(${rotate}deg)`;
+
+            // Opacity Badge (Like/Nope)
+            if (currentX > 0) {
+                domCard.badgeLike.style.opacity = Math.min(currentX / swipeThreshold, 1);
+                domCard.badgeNope.style.opacity = '0';
+            } else {
+                domCard.badgeNope.style.opacity = Math.min(Math.abs(currentX) / swipeThreshold, 1);
+                domCard.badgeLike.style.opacity = '0';
+            }
+        }
+
+        function onDragEnd(e) {
+            if (!isDragging) return;
+            isDragging = false;
+
+            if (currentX > swipeThreshold) {
+                // Swipe Kanan (Sukses)
+                domCard.container.style.transition = 'transform 0.3s ease-out';
+                domCard.container.style.transform = `translateX(${window.innerWidth}px) rotate(30deg)`;
+                setTimeout(() => handleSwipe('right'), 300);
+            } else if (currentX < -swipeThreshold) {
+                // Swipe Kiri (Nope)
+                domCard.container.style.transition = 'transform 0.3s ease-out';
+                domCard.container.style.transform = `translateX(-${window.innerWidth}px) rotate(-30deg)`;
+                setTimeout(() => handleSwipe('left'), 300);
+            } else {
+                // Batal Swipe (Kembali ke tengah)
+                domCard.container.classList.add('snap-back');
+                domCard.container.style.transform = `translateX(0px) rotate(0deg)`;
+                domCard.badgeLike.style.opacity = '0';
+                domCard.badgeNope.style.opacity = '0';
+            }
+            currentX = 0;
+        }
+
+        // Listener Mouse (Desktop)
+        domCard.container.addEventListener('mousedown', onDragStart);
+        document.addEventListener('mousemove', onDragMove); // Pakai document agar tidak putus saat kursor keluar kartu
+        document.addEventListener('mouseup', onDragEnd);
+
+        // Listener Touch (Mobile)
+        domCard.container.addEventListener('touchstart', onDragStart);
+        document.addEventListener('touchmove', onDragMove, {passive: false});
+        document.addEventListener('touchend', onDragEnd);
     </script>
-    <style>
-        @keyframes shrink { from { width: 100%; } to { width: 0%; } }
-    </style>
 </body>
 </html>
