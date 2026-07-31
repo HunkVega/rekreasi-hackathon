@@ -3,40 +3,199 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Beleef de Recreatiebranche - Prototype</title>
+    <title>Beleef de Recreatiebranche - Hackathon</title>
+    <!-- Tailwind CSS via CDN untuk styling cepat & ringan -->
+    <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding: 20px; background: #f4f4f9; }
-        .card { background: white; padding: 20px; margin-bottom: 10px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-        .role-title { font-size: 1.2rem; font-weight: bold; color: #0056b3; }
+        /* Utility class untuk menyembunyikan layar secara instan */
+        .hidden-screen { display: none !important; }
+        
+        /* Animasi masuk untuk kartu */
+        @keyframes popIn {
+            0% { transform: scale(0.9); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        .animate-pop { animation: popIn 0.3s ease-out forwards; }
     </style>
 </head>
-<body>
+<body class="bg-slate-200 text-slate-800 font-sans antialiased min-h-screen flex items-center justify-center p-4">
 
-    <h1>Jelajahi Karier Rekreasi 🏕️⛵</h1>
-    <p>Pilih kartu di bawah ini untuk melihat apa saja yang bisa kamu lakukan di sektor ini!</p>
-    
-    <div id="game-container"></div>
+    <!-- Container Utama (Ukuran Mobile untuk kenyamanan interaksi) -->
+    <div id="app" class="w-full max-w-md bg-white rounded-3xl shadow-2xl overflow-hidden min-h-[600px] flex flex-col relative border-4 border-slate-50">
+
+        <!-- ========================================== -->
+        <!-- SCREEN 1: LAYAR JUDUL -->
+        <!-- ========================================== -->
+        <div id="screen-title" class="flex-1 flex flex-col items-center justify-center p-8 text-center bg-gradient-to-br from-blue-500 to-indigo-600 text-white">
+            <div class="text-7xl mb-6">🏕️</div>
+            <h1 class="text-3xl font-extrabold mb-4 tracking-tight leading-tight">Karier di Alam Bebas?</h1>
+            <p class="mb-10 text-blue-100 text-lg">Cari tahu peran apa yang diam-diam cocok dengan bakatmu di sektor rekreasi!</p>
+            <button onclick="startGame()" class="bg-yellow-400 hover:bg-yellow-300 text-slate-900 font-black text-xl py-4 px-10 rounded-full shadow-[0_8px_0_rgb(202,138,4)] active:shadow-none active:translate-y-2 transition-all">
+                Mulai Main!
+            </button>
+        </div>
+
+        <!-- ========================================== -->
+        <!-- SCREEN 2: GAMEPLAY (SWIPE CARDS) -->
+        <!-- ========================================== -->
+        <div id="screen-game" class="hidden-screen flex-1 flex flex-col p-6 bg-slate-50">
+            <!-- Header Status -->
+            <div class="flex justify-between items-center mb-6">
+                <span class="text-sm font-bold text-slate-400 bg-white px-3 py-1 rounded-full shadow-sm">
+                    Kartu <span id="card-counter">1</span>/5
+                </span>
+                <!-- Badge ini hanya muncul kalau URL mengandung ?mode=lobx -->
+                <span id="mode-badge" class="text-xs px-3 py-1 bg-red-100 text-red-600 rounded-full font-bold hidden border border-red-200">
+                    LOBX Mode
+                </span>
+            </div>
+            
+            <!-- Area Kartu Interaktif -->
+            <div id="card-content" class="flex-1 bg-white border-2 border-slate-100 rounded-3xl flex flex-col items-center justify-center p-8 text-center shadow-lg mb-8 animate-pop">
+                <div class="text-8xl mb-6 drop-shadow-md" id="card-icon">🎯</div>
+                <h2 class="text-2xl font-black mb-3 text-slate-800 leading-tight" id="card-title">Suka Mengatur Acara?</h2>
+                <p class="text-slate-500 font-medium text-lg" id="card-desc">Bikin jadwal aktivitas seru dari pagi sampai malam.</p>
+            </div>
+
+            <!-- Tombol Kontrol (Sebagai ganti swipe fisik untuk MVP) -->
+            <div class="flex justify-between gap-4 mt-auto">
+                <button onclick="handleAction('no')" class="flex-1 bg-white border-b-4 border-slate-200 text-slate-500 hover:bg-red-50 hover:text-red-500 hover:border-red-200 font-bold py-5 rounded-2xl transition active:border-b-0 active:translate-y-1 text-lg">
+                    ✖️ Skip
+                </button>
+                <button onclick="handleAction('yes')" class="flex-1 bg-blue-500 border-b-4 border-blue-700 hover:bg-blue-600 text-white font-bold py-5 rounded-2xl shadow-sm transition active:border-b-0 active:translate-y-1 text-lg">
+                    ❤️ Tarik!
+                </button>
+            </div>
+        </div>
+
+        <!-- ========================================== -->
+        <!-- SCREEN 3: LAYAR KESIMPULAN (PAYLOAD) -->
+        <!-- ========================================== -->
+        <div id="screen-result" class="hidden-screen flex-1 flex flex-col items-center justify-center p-8 text-center bg-gradient-to-br from-teal-400 to-emerald-600 text-white">
+            <div class="text-7xl mb-6">✨</div>
+            <h2 class="text-3xl font-black mb-4">Gak Nyangka Kan?</h2>
+            <p class="mb-6 text-teal-50 text-lg">Di balik taman liburan, ternyata ada ruang buat *skill* kamu di posisi:</p>
+            
+            <div class="bg-white text-emerald-700 w-full p-6 rounded-2xl font-black text-2xl mb-10 shadow-xl transform -rotate-1">
+                Event & Animasi
+            </div>
+            
+            <!-- Aksi Mode Sekolah (Santai, tanpa batas waktu) -->
+            <div id="school-actions" class="w-full hidden space-y-3">
+                <button class="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold py-4 rounded-xl transition">Pelajari Peran Ini</button>
+                <button class="w-full bg-emerald-500 hover:bg-emerald-400 text-white font-bold py-4 rounded-xl border-2 border-emerald-300 transition">Bagikan ke Teman</button>
+            </div>
+
+            <!-- Aksi Mode LOBX Pameran (Hitung mundur reset otomatis) -->
+            <div id="lobx-actions" class="w-full hidden mt-4">
+                <div class="w-full bg-white/20 rounded-full h-2 mb-4">
+                    <div class="bg-white h-2 rounded-full animate-[shrink_5s_linear_forwards]"></div>
+                </div>
+                <p class="text-sm font-bold text-teal-100">Siap-siap! Layar kembali untuk pemain berikutnya...</p>
+            </div>
+        </div>
+
+    </div>
 
     <script>
-        // SEED DATA DUMMY (Hardcoded agar bisa jalan Offline)
-        const dummyRoles = [
-            { id: 1, title: "Marketing Taman Liburan", desc: "Bikin kampanye viral buat narik pengunjung ke resort musim panas.", icon: "📱" },
-            { id: 2, title: "Teknisi Marina", desc: "Punya *skill* mesin? Di sini kamu ngerawat dan benerin *yacht* mewah.", icon: "🔧" },
-            { id: 3, title: "Kreator Event & Animasi", desc: "Ngrancang acara seru, dari konser mini sampai *outbound* buat tamu *camping*.", icon: "🎉" }
+        // --- 1. DATA SEEDING (Sesuai Syarat: Tanpa API, Bisa Offline) ---
+        const cards = [
+            { icon: "📱", title: "Social Media Ninja?", desc: "Suka bikin konten viral dan ngurusin *campaign* sosmed?" },
+            { icon: "🔧", title: "Naluri Ngoprek?", desc: "Ngebenerin alat rusak atau mesin itu panggilan jiwa?" },
+            { icon: "🎉", title: "Party Planner?", desc: "Paling jago ngatur jadwal dan bikin suasana acara pecah?" },
+            { icon: "💻", title: "Tech & Logic?", desc: "Ngelola sistem reservasi online, *database*, dan jaringan WiFi?" },
+            { icon: "🌱", title: "Anak Alam Banget?", desc: "Lebih suka kerja di luar ruangan merawat lanskap dan lingkungan?" }
         ];
 
-        // Render data ke HTML
-        const container = document.getElementById('game-container');
-        dummyRoles.forEach(role => {
-            const card = document.createElement('div');
-            card.className = 'card';
-            card.innerHTML = `
-                <div class="role-title">${role.icon} ${role.title}</div>
-                <p>${role.desc}</p>
-                <button onclick="alert('Keren! Peran ${role.title} cocok buat kamu yang suka tantangan!')">Pilih Peran Ini</button>
-            `;
-            container.appendChild(card);
-        });
+        let currentIndex = 0;
+        let currentMode = 'sekolah'; // Mode Default
+        let resetTimer = null;
+
+        // --- 2. DEKLARASI KOMPONEN DOM ---
+        const screens = {
+            title: document.getElementById('screen-title'),
+            game: document.getElementById('screen-game'),
+            result: document.getElementById('screen-result')
+        };
+        const domCard = {
+            container: document.getElementById('card-content'),
+            icon: document.getElementById('card-icon'),
+            title: document.getElementById('card-title'),
+            desc: document.getElementById('card-desc'),
+            counter: document.getElementById('card-counter')
+        };
+
+        // --- 3. DETEKSI LINGKUNGAN (Pameran vs Sekolah) ---
+        window.onload = () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            // Cek jika URL adalah: domain.com/?mode=lobx
+            if (urlParams.get('mode') === 'lobx') {
+                currentMode = 'lobx';
+                document.getElementById('mode-badge').classList.remove('hidden');
+            }
+        };
+
+        // --- 4. LOGIKA PERMAINAN ---
+        function startGame() {
+            currentIndex = 0;
+            renderCard();
+            switchScreen('game');
+        }
+
+        function renderCard() {
+            // Trigger animasi ulang dengan me-remove lalu add class
+            domCard.container.classList.remove('animate-pop');
+            void domCard.container.offsetWidth; // Trigger reflow magic
+            domCard.container.classList.add('animate-pop');
+
+            const cardData = cards[currentIndex];
+            domCard.icon.innerText = cardData.icon;
+            domCard.title.innerText = cardData.title;
+            domCard.desc.innerText = cardData.desc;
+            domCard.counter.innerText = currentIndex + 1;
+        }
+
+        function handleAction(choice) {
+            // Logika: Lanjut ke kartu berikutnya
+            currentIndex++;
+            
+            if (currentIndex < cards.length) {
+                renderCard();
+            } else {
+                finishGame();
+            }
+        }
+
+        function finishGame() {
+            switchScreen('result');
+
+            // Eksekusi percabangan fitur berdasarkan parameter URL
+            if (currentMode === 'lobx') {
+                document.getElementById('lobx-actions').classList.remove('hidden');
+                document.getElementById('school-actions').classList.add('hidden');
+                
+                // RESET INSTAN: Membersihkan DOM dan kembali ke layar awal dalam 5 detik
+                resetTimer = setTimeout(() => {
+                    resetApp();
+                }, 5000);
+            } else {
+                document.getElementById('school-actions').classList.remove('hidden');
+                document.getElementById('lobx-actions').classList.add('hidden');
+            }
+        }
+
+        function resetApp() {
+            clearTimeout(resetTimer);
+            switchScreen('title');
+        }
+
+        function switchScreen(targetScreen) {
+            Object.values(screens).forEach(s => s.classList.add('hidden-screen'));
+            screens[targetScreen].classList.remove('hidden-screen');
+        }
     </script>
+    <style>
+        @keyframes shrink { from { width: 100%; } to { width: 0%; } }
+    </style>
 </body>
 </html>
