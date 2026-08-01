@@ -41,10 +41,9 @@ function loadMap(professionId) {
         pinBtn.style.left = caseData.posX;
         pinBtn.onclick = () => startPuzzle(caseData);
         
-        // Efek radar berkedip
         pinBtn.innerHTML = `
             <div class="map-pin-pulse"></div>
-            <span class="relative z-10 text-white font-black">!</span>
+            <span class="relative z-10 text-white font-black drop-shadow-md">!</span>
         `;
         
         mapContainer.appendChild(pinBtn);
@@ -57,7 +56,6 @@ function loadMap(professionId) {
 function startPuzzle(caseData) {
     currentActiveCase = caseData;
     
-    // Setup UI Puzzle
     document.getElementById('puzzle-title').innerText = caseData.title;
     document.getElementById('puzzle-instruction').innerText = caseData.instruction;
     document.getElementById('item-icon').innerText = caseData.itemIcon;
@@ -70,7 +68,7 @@ function startPuzzle(caseData) {
 
 function closePuzzle() {
     currentActiveCase = null;
-    switchScene('map'); // Kembali ke map profesi tersebut
+    switchScene('map');
 }
 
 // --- 4. DRAG & DROP MECHANICS (AABB COLLISION) ---
@@ -86,9 +84,8 @@ function resetPuzzleState() {
     successOverlay.classList.remove('flex');
     dropzone.className = 'absolute w-32 h-32 border-4 border-dashed border-slate-600 rounded-2xl flex items-center justify-center bg-slate-800/50 transition-colors z-0';
     
-    // Acak posisi item sedikit
-    xOffset = (Math.random() - 0.5) * 160; 
-    yOffset = (Math.random() - 0.5) * 120 + 80;
+    xOffset = (Math.random() - 0.5) * 140; 
+    yOffset = (Math.random() - 0.5) * 100 + 60;
     setTranslate(xOffset, yOffset, draggable);
 }
 
@@ -133,7 +130,6 @@ function checkCollision() {
     const dragRect = draggable.getBoundingClientRect();
     const dropRect = dropzone.getBoundingClientRect();
 
-    // Logika pembatas AABB (Trigger Enter)
     const isColliding = !(
         dragRect.top > dropRect.bottom ||
         dragRect.right < dropRect.left ||
