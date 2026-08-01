@@ -4,61 +4,100 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>HISWA-RECRON: Recreatie Puzzel</title>
-    <!-- Tailwind via CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Custom CSS -->
     <link rel="stylesheet" href="./assets/css/style.css">
 </head>
-<body class="bg-slate-200 text-slate-800 font-sans antialiased min-h-screen flex items-center justify-center p-4 select-none">
+<body class="bg-slate-900 text-slate-800 font-sans antialiased min-h-screen flex items-center justify-center p-4 select-none">
 
-    <div id="app" class="w-full max-w-md bg-white rounded-3xl shadow-2xl overflow-hidden h-[700px] flex flex-col relative border-4 border-slate-50">
+    <!-- CANVAS UTAMA -->
+    <div id="game-canvas" class="w-full max-w-md bg-white rounded-3xl shadow-2xl overflow-hidden h-[750px] flex flex-col relative border-4 border-slate-700">
 
-        <!-- SCREEN 1: LOBBY -->
-        <div id="screen-lobby" class="flex-1 flex flex-col p-6 bg-slate-50 overflow-y-auto">
-            <div class="mb-8 mt-4 text-center">
-                <h1 class="text-3xl font-black text-slate-800 tracking-tight mb-2">Kies je missie!</h1>
-                <p class="text-slate-500 font-medium">Help om de chaos op het vakantiepark op te lossen.</p>
+        <!-- ========================================= -->
+        <!-- SCENE 1: MAIN MENU (PILIH PROFESI) -->
+        <!-- ========================================= -->
+        <div id="scene-home" class="scene active-scene flex-1 flex flex-col p-6 bg-slate-50 relative overflow-y-auto">
+            <div class="mt-8 mb-6 text-center z-10">
+                <h1 class="text-4xl font-black text-slate-800 tracking-tight mb-2">Kies je pad!</h1>
+                <p class="text-slate-500 font-medium">Welke sector in de recreatie past bij jou?</p>
             </div>
             
-            <!-- List misi akan di-generate via JavaScript -->
-            <div class="space-y-4" id="mission-list"></div>
+            <div class="flex-1 flex flex-col gap-4 justify-center z-10">
+                <!-- Tombol Profesi Tech -->
+                <button onclick="loadMap('tech')" class="group relative bg-blue-600 rounded-2xl p-6 text-left shadow-lg overflow-hidden hover:scale-[1.02] active:scale-95 transition-transform">
+                    <div class="absolute inset-0 bg-black/20 group-hover:bg-transparent transition-colors"></div>
+                    <span class="text-5xl mb-4 block relative z-10">💻</span>
+                    <h2 class="text-2xl font-bold text-white relative z-10">Tech & Logica</h2>
+                    <p class="text-blue-100 mt-2 relative z-10">Los netwerk- en systeemproblemen op.</p>
+                </button>
+
+                <!-- Tombol Profesi Alam -->
+                <button onclick="loadMap('nature')" class="group relative bg-emerald-600 rounded-2xl p-6 text-left shadow-lg overflow-hidden hover:scale-[1.02] active:scale-95 transition-transform">
+                    <div class="absolute inset-0 bg-black/20 group-hover:bg-transparent transition-colors"></div>
+                    <span class="text-5xl mb-4 block relative z-10">🏕️</span>
+                    <h2 class="text-2xl font-bold text-white relative z-10">Natuur & Groen</h2>
+                    <p class="text-emerald-100 mt-2 relative z-10">Zorg voor een prachtig en veilig park.</p>
+                </button>
+            </div>
         </div>
 
-        <!-- SCREEN 2: PUZZLE ROOM -->
-        <div id="screen-puzzle" class="hidden-screen flex-1 flex flex-col p-6 bg-slate-800 text-white relative">
-            <div class="flex justify-between items-center mb-6 z-20">
-                <button onclick="backToLobby()" class="bg-slate-700 hover:bg-slate-600 px-4 py-2 rounded-full font-bold text-sm transition-colors">
-                    ← Terug
+        <!-- ========================================= -->
+        <!-- SCENE 2: OVERWORLD MAP (PETA LEVEL) -->
+        <!-- ========================================= -->
+        <div id="scene-map" class="scene flex-1 relative bg-slate-200 overflow-hidden">
+            <!-- Header Peta -->
+            <div class="absolute top-0 left-0 w-full p-4 z-20 bg-gradient-to-b from-slate-900/90 to-transparent">
+                <button onclick="goHome()" class="text-white text-sm font-bold mb-2 flex items-center gap-2 hover:text-slate-300">
+                    <span>←</span> Menu
                 </button>
-                <span id="puzzle-title" class="font-black text-lg">Actieve Missie</span>
+                <h2 id="map-title" class="text-white font-black text-2xl drop-shadow-md">Kaart</h2>
+            </div>
+
+            <!-- Area Peta & Pin Generator -->
+            <!-- Note: Background peta sementara pakai warna. Nanti bisa diganti gambar di CSS -->
+            <div id="map-container" class="absolute inset-0 w-full h-full bg-slate-300 transition-colors duration-500">
+                <!-- Pin Point akan di-generate via JavaScript di sini -->
+            </div>
+        </div>
+
+        <!-- ========================================= -->
+        <!-- SCENE 3: RUANG PUZZLE (GAMEPLAY) -->
+        <!-- ========================================= -->
+        <div id="scene-puzzle" class="scene flex-1 flex flex-col p-6 bg-slate-800 text-white relative">
+            <div class="flex justify-between items-center mb-6 z-20">
+                <button onclick="closePuzzle()" class="bg-slate-700 hover:bg-slate-600 px-4 py-2 rounded-full font-bold text-sm transition-colors">
+                    ← Kaart
+                </button>
+                <span id="puzzle-title" class="font-black text-lg">Missie</span>
             </div>
 
             <p id="puzzle-instruction" class="text-center font-medium text-slate-300 mb-8 z-20">Instructie...</p>
 
             <div class="relative flex-1 bg-slate-900 rounded-2xl border-4 border-slate-700 overflow-hidden shadow-inner flex items-center justify-center">
+                <!-- Collider Target -->
                 <div id="dropzone" class="absolute w-32 h-32 border-4 border-dashed border-slate-600 rounded-2xl flex items-center justify-center bg-slate-800/50 transition-colors z-0">
                     <span id="dropzone-icon" class="text-5xl opacity-50 grayscale">📡</span>
                 </div>
 
+                <!-- Objek Draggable -->
                 <div id="draggable-item" class="draggable absolute z-10 p-2">
                     <div id="item-icon" class="text-6xl filter drop-shadow-lg hover:scale-110 transition-transform">🔌</div>
                 </div>
             </div>
             
-            <div id="success-overlay" class="absolute inset-0 bg-emerald-500/90 z-30 hidden flex-col items-center justify-center animate-pop backdrop-blur-sm">
+            <!-- Layar Sukses -->
+            <div id="success-overlay" class="absolute inset-0 bg-emerald-500/95 z-30 hidden flex-col items-center justify-center animate-pop backdrop-blur-sm">
                 <div class="text-8xl mb-4">🎉</div>
-                <h2 class="text-3xl font-black mb-2 shadow-sm text-center">Gelukt!</h2>
-                <p id="success-message" class="text-emerald-50 font-bold text-center px-6 mb-8">Goed gedaan!</p>
-                <button onclick="backToLobby()" class="bg-white text-emerald-700 font-black px-8 py-4 rounded-full shadow-lg hover:scale-105 active:scale-95 transition-all">
-                    Kies andere missie
+                <h2 class="text-4xl font-black mb-2 shadow-sm text-center">Gelukt!</h2>
+                <p id="success-message" class="text-emerald-50 font-bold text-center px-6 mb-8 text-lg">Goed gedaan!</p>
+                <button onclick="closePuzzle()" class="bg-white text-emerald-700 font-black px-8 py-4 rounded-full shadow-lg hover:scale-105 active:scale-95 transition-all">
+                    Terug naar kaart
                 </button>
             </div>
         </div>
 
     </div>
 
-    <!-- Hubungkan Data dan Logika Mekanik -->
     <script src="./assets/js/data.js"></script>
-    <script src="./assets/js/puzzle.js"></script>
+    <script src="./assets/js/game.js"></script>
 </body>
 </html>
