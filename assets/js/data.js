@@ -2,14 +2,15 @@ const gameData = {
     // PROFESI 1: TECH & LOGIC
     'tech': {
         mapTitle: 'Tech & IT Kaart',
-        mapTheme: 'bg-blue-200', // Nantinya bisa diganti URL gambar peta spesifik
+        mapTheme: 'bg-blue-200', 
         cases: [
             {
                 id: 'router_fix',
-                posY: '35%', // Koordinat Y (Top)
-                posX: '25%', // Koordinat X (Left)
+                posY: '35%', 
+                posX: '25%', 
                 pinColor: 'bg-blue-600',
                 title: 'WiFi Storing!',
+                funDesc: 'Gasten flippen! Geen WiFi betekent geen TikTok of Insta. Red hun vakantie en fix de router als een echte IT-held!',
                 instruction: 'Sleep de kabel naar de kapotte router.',
                 itemIcon: '🔌',
                 dropIcon: '📡',
@@ -20,7 +21,8 @@ const gameData = {
                 posY: '65%',
                 posX: '70%',
                 pinColor: 'bg-indigo-600',
-                title: 'Server Error',
+                title: 'Systeem Plat',
+                funDesc: 'Drama! Het reserveringssysteem is offline. Niemand kan een plek boeken. Tijd om je tech-skills te gebruiken.',
                 instruction: 'Verplaats de harde schijf naar de server.',
                 itemIcon: '💽',
                 dropIcon: '🖥️',
@@ -40,6 +42,7 @@ const gameData = {
                 posX: '60%',
                 pinColor: 'bg-emerald-600',
                 title: 'Boom op de weg',
+                funDesc: 'Oeps, een dikke boom blokkeert de weg na de storm van gister. Tijd voor actie! Grijp de zaag en maak de weg vrij.',
                 instruction: 'Sleep de kettingzaag naar de omgevallen boom.',
                 itemIcon: '🪚',
                 dropIcon: '🪵',
@@ -50,7 +53,8 @@ const gameData = {
                 posY: '75%',
                 posX: '35%',
                 pinColor: 'bg-cyan-600',
-                title: 'Vies Zwembad',
+                title: 'Moeras Zwembad',
+                funDesc: 'Iew, het zwembad lijkt wel een groen moeras! Niemand wil hierin zwemmen. Voeg de juiste spullen toe om het water helder te maken.',
                 instruction: 'Verplaats het chloor naar het zwembadwater.',
                 itemIcon: '🧪',
                 dropIcon: '🏊‍♂️',
