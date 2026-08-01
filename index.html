@@ -6,17 +6,18 @@
     <title>HISWA-RECRON: Recreatie Puzzel</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="./assets/css/style.css">
+    <style>
+        /* Perbaikan display scene */
+        .scene { display: none; opacity: 0; transition: opacity 0.3s ease-in-out; width: 100%; height: 100%; }
+        .scene.active-scene { display: flex !important; opacity: 1; }
+    </style>
 </head>
-<!-- Body dikunci agar tidak bisa scroll luar -->
 <body class="bg-slate-900 text-slate-800 font-sans antialiased h-screen w-screen flex items-center justify-center sm:p-4 select-none overflow-hidden">
 
-    <!-- CANVAS UTAMA (Responsive: Full di HP, Kotak di Desktop) -->
     <div id="game-canvas" class="w-full h-full sm:h-[85vh] sm:max-h-[850px] max-w-md bg-white sm:rounded-3xl shadow-2xl overflow-hidden flex flex-col relative sm:border-4 border-slate-700">
 
-        <!-- ========================================= -->
         <!-- SCENE 1: MAIN MENU -->
-        <!-- ========================================= -->
-        <div id="scene-home" class="scene active-scene flex-1 flex flex-col p-6 bg-slate-50 relative">
+        <div id="scene-home" class="scene active-scene flex-col p-6 bg-slate-50 relative">
             <div class="mt-4 mb-4 text-center z-10 shrink-0">
                 <h1 class="text-4xl font-black text-slate-800 tracking-tight mb-2">Kies je pad!</h1>
                 <p class="text-slate-500 font-medium text-sm">Welke sector in de recreatie past bij jou?</p>
@@ -24,14 +25,12 @@
             
             <div class="flex-1 flex flex-col gap-4 justify-center z-10 mb-4">
                 <button onclick="loadMap('tech')" class="group relative bg-blue-600 rounded-2xl p-5 text-left shadow-lg overflow-hidden hover:scale-[1.02] active:scale-95 transition-transform flex-1 flex flex-col justify-center">
-                    <div class="absolute inset-0 bg-black/20 group-hover:bg-transparent transition-colors"></div>
                     <span class="text-4xl mb-2 block relative z-10 drop-shadow-md">💻</span>
                     <h2 class="text-xl font-bold text-white relative z-10">Tech & Logica</h2>
                     <p class="text-blue-100 mt-1 relative z-10 text-sm leading-tight">Los netwerk- en systeemproblemen op.</p>
                 </button>
 
                 <button onclick="loadMap('nature')" class="group relative bg-emerald-600 rounded-2xl p-5 text-left shadow-lg overflow-hidden hover:scale-[1.02] active:scale-95 transition-transform flex-1 flex flex-col justify-center">
-                    <div class="absolute inset-0 bg-black/20 group-hover:bg-transparent transition-colors"></div>
                     <span class="text-4xl mb-2 block relative z-10 drop-shadow-md">🏕️</span>
                     <h2 class="text-xl font-bold text-white relative z-10">Natuur & Groen</h2>
                     <p class="text-emerald-100 mt-1 relative z-10 text-sm leading-tight">Zorg voor een prachtig en veilig park.</p>
@@ -39,23 +38,37 @@
             </div>
         </div>
 
-        <!-- ========================================= -->
-        <!-- SCENE 2: OVERWORLD MAP -->
-        <!-- ========================================= -->
-        <div id="scene-map" class="scene flex-1 relative bg-slate-200 overflow-hidden">
-            <div class="absolute top-0 left-0 w-full p-4 z-20 bg-gradient-to-b from-slate-900/90 to-transparent">
+        <!-- SCENE 2: OVERWORLD MAP DENGAN BOTTOM SHEET MODAL -->
+        <div id="scene-map" class="scene flex-col relative bg-slate-200 overflow-hidden">
+            <div class="absolute top-0 left-0 w-full p-4 z-20 bg-gradient-to-b from-slate-900/90 to-transparent h-24">
                 <button onclick="goHome()" class="text-white text-sm font-bold mb-1 flex items-center gap-2 hover:text-slate-300">
                     <span>←</span> Menu
                 </button>
                 <h2 id="map-title" class="text-white font-black text-2xl drop-shadow-md">Kaart</h2>
             </div>
-            <div id="map-container" class="absolute inset-0 w-full h-full bg-slate-300 transition-colors duration-500"></div>
+            
+            <!-- Area Peta & Pin -->
+            <div id="map-container" class="absolute inset-0 w-full h-full transition-colors duration-500 z-10"></div>
+
+            <!-- Overlay Redup (Muncul saat pin diklik) -->
+            <div id="modal-overlay" class="absolute inset-0 bg-slate-900/40 z-30 opacity-0 pointer-events-none transition-opacity duration-300 backdrop-blur-sm" onclick="closeModal()"></div>
+
+            <!-- Bottom Sheet Pop-up -->
+            <div id="case-modal" class="absolute bottom-0 left-0 w-full bg-white rounded-t-3xl shadow-[0_-10px_40px_rgba(0,0,0,0.1)] z-40 transform translate-y-full transition-transform duration-300 ease-out p-6 flex flex-col gap-4 border-t-2 border-slate-100">
+                <div class="w-12 h-1.5 bg-slate-300 rounded-full mx-auto mb-2"></div>
+                <div class="flex items-center gap-3">
+                    <span id="modal-icon" class="text-4xl">⚠️</span>
+                    <h3 id="modal-title" class="text-2xl font-black text-slate-800">Judul Kasus</h3>
+                </div>
+                <p id="modal-desc" class="text-slate-600 font-medium leading-relaxed text-sm">Deskripsi seru di sini...</p>
+                <button id="modal-start-btn" class="w-full bg-slate-800 hover:bg-slate-700 text-white font-bold py-3.5 rounded-xl shadow-md transition-all active:scale-95 mt-2">
+                    Selesaikan Masalah!
+                </button>
+            </div>
         </div>
 
-        <!-- ========================================= -->
         <!-- SCENE 3: RUANG PUZZLE -->
-        <!-- ========================================= -->
-        <div id="scene-puzzle" class="scene flex-1 flex flex-col p-6 bg-slate-800 text-white relative">
+        <div id="scene-puzzle" class="scene flex-col p-6 bg-slate-800 text-white relative">
             <div class="flex justify-between items-center mb-4 z-20 shrink-0 mt-2">
                 <button onclick="closePuzzle()" class="bg-slate-700 hover:bg-slate-600 px-4 py-2 rounded-full font-bold text-sm transition-colors">
                     ← Kaart
