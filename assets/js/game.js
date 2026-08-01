@@ -1,180 +1,132 @@
-// Referensi DOM
-const scenes = {
-    home: document.getElementById('scene-home'),
-    map: document.getElementById('scene-map'),
-    puzzle: document.getElementById('scene-puzzle')
-};
-const mapContainer = document.getElementById('map-container');
-const mapTitle = document.getElementById('map-title');
+// --- 3. PUZZLE INITIALIZER (DYNAMIC TOOLBOX) ---
+const dropzone = document.getElementById('dropzone');
+const toolbox = document.getElementById('toolbox');
+const successOverlay = document.getElementById('success-overlay');
+const errorToast = document.getElementById('error-toast');
 
-// Referensi Modal Bottom Sheet
-const caseModal = document.getElementById('case-modal');
-const modalOverlay = document.getElementById('modal-overlay');
-
-// Variabel Status Game
-let currentProfession = null;
-let currentActiveCase = null;
-
-// --- 1. SCENE MANAGEMENT ---
-function switchScene(sceneName) {
-    Object.values(scenes).forEach(s => s.classList.remove('active-scene'));
-    scenes[sceneName].classList.add('active-scene');
-}
-
-function goHome() {
-    currentProfession = null;
-    closeModal(); // Pastikan modal tertutup saat kembali
-    switchScene('home');
-}
-
-// --- 2. MAP & MODAL LOGIC ---
-function loadMap(professionId) {
-    currentProfession = professionId;
-    const data = gameData[professionId];
-    
-    mapTitle.innerText = data.mapTitle;
-    mapContainer.className = `absolute inset-0 w-full h-full transition-colors duration-500 z-10 ${data.mapTheme}`;
-    mapContainer.innerHTML = '';
-
-    data.cases.forEach(caseData => {
-        const pinBtn = document.createElement('button');
-        pinBtn.className = `map-pin w-14 h-14 rounded-full border-4 border-white shadow-xl flex items-center justify-center text-xl transform hover:scale-110 active:scale-95 transition-all ${caseData.pinColor}`;
-        pinBtn.style.top = caseData.posY;
-        pinBtn.style.left = caseData.posX;
-        
-        // Ubah dari startPuzzle langsung menjadi openModal
-        pinBtn.onclick = () => openModal(caseData);
-        
-        pinBtn.innerHTML = `
-            <div class="map-pin-pulse"></div>
-            <span class="relative z-10 text-white font-black drop-shadow-md">!</span>
-        `;
-        mapContainer.appendChild(pinBtn);
-    });
-
-    switchScene('map');
-}
-
-function openModal(caseData) {
-    // Isi data ke modal
-    document.getElementById('modal-icon').innerText = caseData.itemIcon;
-    document.getElementById('modal-title').innerText = caseData.title;
-    document.getElementById('modal-desc').innerText = caseData.funDesc; // Menggunakan teks funDesc
-    
-    // Setel tombol start
-    const startBtn = document.getElementById('modal-start-btn');
-    startBtn.onclick = () => {
-        closeModal();
-        setTimeout(() => startPuzzle(caseData), 300); // Tunggu animasi modal turun
-    };
-
-    // Tampilkan Modal & Overlay dengan transisi Tailwind
-    modalOverlay.classList.remove('opacity-0', 'pointer-events-none');
-    modalOverlay.classList.add('opacity-100', 'pointer-events-auto');
-    caseModal.classList.remove('translate-y-full');
-    caseModal.classList.add('translate-y-0');
-}
-
-function closeModal() {
-    // Sembunyikan Modal & Overlay
-    modalOverlay.classList.remove('opacity-100', 'pointer-events-auto');
-    modalOverlay.classList.add('opacity-0', 'pointer-events-none');
-    caseModal.classList.remove('translate-y-0');
-    caseModal.classList.add('translate-y-full');
-}
-
-// --- 3. PUZZLE INITIALIZER ---
 function startPuzzle(caseData) {
     currentActiveCase = caseData;
     
+    // Set Teks
     document.getElementById('puzzle-title').innerText = caseData.title;
     document.getElementById('puzzle-instruction').innerText = caseData.instruction;
-    document.getElementById('item-icon').innerText = caseData.itemIcon;
-    document.getElementById('dropzone-icon').innerText = caseData.dropIcon;
+    document.getElementById('problem-visual').innerText = caseData.problemVisual;
+    document.getElementById('dropzone-label').innerText = caseData.dropIcon;
     document.getElementById('success-message').innerText = caseData.successMsg;
     
-    resetPuzzleState();
+    // Render Toolbox
+    toolbox.innerHTML = '';
+    caseData.tools.forEach(tool => {
+        const toolEl = document.createElement('div');
+        // Data attribute untuk validasi
+        toolEl.dataset.isCorrect = tool.isCorrect;
+        toolEl.dataset.errorMsg = tool.errorMsg;
+        
+        toolEl.className = 'draggable relative w-20 h-20 bg-slate-700 rounded-2xl border-b-4 border-slate-900 flex flex-col items-center justify-center shadow-lg active:border-b-0 active:translate-y-1';
+        toolEl.innerHTML = `
+            <span class="text-4xl pointer-events-none">${tool.icon}</span>
+            <span class="text-[10px] font-bold text-slate-300 mt-1 pointer-events-none">${tool.name}</span>
+        `;
+        
+        // Attach Event Listeners ke masing-masing alat
+        toolEl.addEventListener('pointerdown', dragStart);
+        toolbox.appendChild(toolEl);
+    });
+
+    // Reset UI
+    successOverlay.classList.add('hidden');
+    successOverlay.classList.remove('flex');
+    dropzone.className = 'relative flex-1 bg-slate-800 rounded-3xl border-4 border-dashed border-slate-600 overflow-hidden shadow-inner flex flex-col items-center justify-center mb-6 transition-colors duration-300';
+    
     switchScene('puzzle');
 }
 
-function closePuzzle() {
-    currentActiveCase = null;
-    switchScene('map');
-}
+// --- 4. ADVANCED DRAG & DROP MECHANICS ---
+let activeItem = null;
+let initialX, initialY, currentX = 0, currentY = 0;
 
-// --- 4. DRAG & DROP MECHANICS (AABB COLLISION) ---
-const draggable = document.getElementById('draggable-item');
-const dropzone = document.getElementById('dropzone');
-const successOverlay = document.getElementById('success-overlay');
-
-let isDragging = false;
-let initialX, initialY, xOffset = 0, yOffset = 0;
-
-function resetPuzzleState() {
-    successOverlay.classList.add('hidden');
-    successOverlay.classList.remove('flex');
-    dropzone.className = 'absolute w-32 h-32 border-4 border-dashed border-slate-600 rounded-2xl flex items-center justify-center bg-slate-800/50 transition-colors z-0';
+function dragStart(e) {
+    activeItem = e.currentTarget;
+    activeItem.classList.add('dragging');
     
-    xOffset = (Math.random() - 0.5) * 140; 
-    yOffset = (Math.random() - 0.5) * 100 + 60;
-    setTranslate(xOffset, yOffset, draggable);
-}
-
-draggable.addEventListener('pointerdown', (e) => {
-    initialX = e.clientX - xOffset;
-    initialY = e.clientY - yOffset;
-    isDragging = true;
-});
-
-document.addEventListener('pointermove', (e) => {
-    if (isDragging) {
-        e.preventDefault(); 
-        xOffset = e.clientX - initialX;
-        yOffset = e.clientY - initialY;
-        setTranslate(xOffset, yOffset, draggable);
-        checkCollision();
-    }
-});
-
-document.addEventListener('pointerup', () => {
-    if (!isDragging) return;
-    initialX = xOffset;
-    initialY = yOffset;
-    isDragging = false;
+    // Reset transform internal
+    const style = window.getComputedStyle(activeItem);
+    const matrix = new WebKitCSSMatrix(style.transform);
+    currentX = matrix.m41;
+    currentY = matrix.m42;
     
-    if (checkCollision()) {
-        xOffset = 0; yOffset = 0;
-        setTranslate(0, 0, draggable);
-        
-        setTimeout(() => {
-            successOverlay.classList.remove('hidden');
-            successOverlay.classList.add('flex');
-        }, 300);
-    }
-});
+    initialX = e.clientX - currentX;
+    initialY = e.clientY - currentY;
 
-function setTranslate(xPos, yPos, el) {
-    el.style.transform = `translate3d(${xPos}px, ${yPos}px, 0)`;
+    document.addEventListener('pointermove', drag);
+    document.addEventListener('pointerup', dragEnd);
 }
 
-function checkCollision() {
-    const dragRect = draggable.getBoundingClientRect();
+function drag(e) {
+    if (!activeItem) return;
+    e.preventDefault(); 
+    
+    currentX = e.clientX - initialX;
+    currentY = e.clientY - initialY;
+    
+    activeItem.style.transform = `translate3d(${currentX}px, ${currentY}px, 0)`;
+}
+
+function dragEnd(e) {
+    if (!activeItem) return;
+    
+    document.removeEventListener('pointermove', drag);
+    document.removeEventListener('pointerup', dragEnd);
+    activeItem.classList.remove('dragging');
+
+    // Cek Tabrakan dengan Dropzone
+    const itemRect = activeItem.getBoundingClientRect();
     const dropRect = dropzone.getBoundingClientRect();
 
     const isColliding = !(
-        dragRect.top > dropRect.bottom ||
-        dragRect.right < dropRect.left ||
-        dragRect.bottom < dropRect.top ||
-        dragRect.left > dropRect.right
+        itemRect.top > dropRect.bottom ||
+        itemRect.right < dropRect.left ||
+        itemRect.bottom < dropRect.top ||
+        itemRect.left > dropRect.right
     );
 
     if (isColliding) {
-        dropzone.classList.replace('border-slate-600', 'border-emerald-500');
-        dropzone.classList.replace('bg-slate-800/50', 'bg-emerald-500/30');
-        return true;
+        // VALIDASI BENAR/SALAH
+        if (activeItem.dataset.isCorrect === 'true') {
+            // BENAR!
+            dropzone.classList.replace('border-slate-600', 'border-emerald-500');
+            dropzone.classList.replace('bg-slate-800', 'bg-emerald-900');
+            
+            setTimeout(() => {
+                successOverlay.classList.remove('hidden');
+                successOverlay.classList.add('flex');
+            }, 400);
+        } else {
+            // SALAH ALAT!
+            showError(activeItem.dataset.errorMsg);
+            resetItemPosition(activeItem);
+        }
     } else {
-        dropzone.classList.replace('border-emerald-500', 'border-slate-600');
-        dropzone.classList.replace('bg-emerald-500/30', 'bg-slate-800/50');
-        return false;
+        // Dilepas di luar area, kembalikan ke toolbox
+        resetItemPosition(activeItem);
     }
+    
+    activeItem = null;
+}
+
+function resetItemPosition(item) {
+    item.style.transform = 'translate3d(0px, 0px, 0)';
+}
+
+function showError(msg) {
+    errorToast.innerText = msg;
+    errorToast.classList.remove('opacity-0', '-translate-y-4');
+    errorToast.classList.add('opacity-100', 'translate-y-0');
+    dropzone.classList.add('animate-shake', 'border-red-500');
+    
+    setTimeout(() => {
+        errorToast.classList.add('opacity-0', '-translate-y-4');
+        errorToast.classList.remove('opacity-100', 'translate-y-0');
+        dropzone.classList.remove('animate-shake', 'border-red-500');
+    }, 2000);
 }
