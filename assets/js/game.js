@@ -7,6 +7,10 @@ const scenes = {
 const mapContainer = document.getElementById('map-container');
 const mapTitle = document.getElementById('map-title');
 
+// Referensi Modal Bottom Sheet
+const caseModal = document.getElementById('case-modal');
+const modalOverlay = document.getElementById('modal-overlay');
+
 // Variabel Status Game
 let currentProfession = null;
 let currentActiveCase = null;
@@ -19,37 +23,64 @@ function switchScene(sceneName) {
 
 function goHome() {
     currentProfession = null;
+    closeModal(); // Pastikan modal tertutup saat kembali
     switchScene('home');
 }
 
-// --- 2. MAP GENERATOR ---
+// --- 2. MAP & MODAL LOGIC ---
 function loadMap(professionId) {
     currentProfession = professionId;
     const data = gameData[professionId];
     
     mapTitle.innerText = data.mapTitle;
-    mapContainer.className = `absolute inset-0 w-full h-full transition-colors duration-500 ${data.mapTheme}`;
-    
-    // Bersihkan pin lama
+    mapContainer.className = `absolute inset-0 w-full h-full transition-colors duration-500 z-10 ${data.mapTheme}`;
     mapContainer.innerHTML = '';
 
-    // Generate pin berdasarkan koordinat di data.js
     data.cases.forEach(caseData => {
         const pinBtn = document.createElement('button');
         pinBtn.className = `map-pin w-14 h-14 rounded-full border-4 border-white shadow-xl flex items-center justify-center text-xl transform hover:scale-110 active:scale-95 transition-all ${caseData.pinColor}`;
         pinBtn.style.top = caseData.posY;
         pinBtn.style.left = caseData.posX;
-        pinBtn.onclick = () => startPuzzle(caseData);
+        
+        // Ubah dari startPuzzle langsung menjadi openModal
+        pinBtn.onclick = () => openModal(caseData);
         
         pinBtn.innerHTML = `
             <div class="map-pin-pulse"></div>
             <span class="relative z-10 text-white font-black drop-shadow-md">!</span>
         `;
-        
         mapContainer.appendChild(pinBtn);
     });
 
     switchScene('map');
+}
+
+function openModal(caseData) {
+    // Isi data ke modal
+    document.getElementById('modal-icon').innerText = caseData.itemIcon;
+    document.getElementById('modal-title').innerText = caseData.title;
+    document.getElementById('modal-desc').innerText = caseData.funDesc; // Menggunakan teks funDesc
+    
+    // Setel tombol start
+    const startBtn = document.getElementById('modal-start-btn');
+    startBtn.onclick = () => {
+        closeModal();
+        setTimeout(() => startPuzzle(caseData), 300); // Tunggu animasi modal turun
+    };
+
+    // Tampilkan Modal & Overlay dengan transisi Tailwind
+    modalOverlay.classList.remove('opacity-0', 'pointer-events-none');
+    modalOverlay.classList.add('opacity-100', 'pointer-events-auto');
+    caseModal.classList.remove('translate-y-full');
+    caseModal.classList.add('translate-y-0');
+}
+
+function closeModal() {
+    // Sembunyikan Modal & Overlay
+    modalOverlay.classList.remove('opacity-100', 'pointer-events-auto');
+    modalOverlay.classList.add('opacity-0', 'pointer-events-none');
+    caseModal.classList.remove('translate-y-0');
+    caseModal.classList.add('translate-y-full');
 }
 
 // --- 3. PUZZLE INITIALIZER ---
