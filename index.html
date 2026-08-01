@@ -1,300 +1,64 @@
 <!DOCTYPE html>
-<html lang="id">
+<html lang="nl">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>HISWA-RECRON: Recreatie Puzzel</title>
+    <!-- Tailwind via CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        .hidden-screen { display: none !important; }
-        
-        /* Animasi Transisi Accordion */
-        .accordion-content {
-            max-height: 0;
-            overflow: hidden;
-            transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1), padding 0.4s ease;
-        }
-        .accordion-open .accordion-content {
-            max-height: 300px; /* Cukup panjang untuk teks dan tombol */
-            padding-top: 1rem;
-            padding-bottom: 1rem;
-        }
-
-        /* Mencegah scroll layar saat menarik objek puzzle */
-        .draggable {
-            touch-action: none;
-            cursor: grab;
-            transition: transform 0.1s; /* Biar nempel ke kursor agak halus */
-        }
-        .draggable:active {
-            cursor: grabbing;
-        }
-
-        /* Animasi masuk elemen */
-        @keyframes pop {
-            0% { transform: scale(0.8); opacity: 0; }
-            100% { transform: scale(1); opacity: 1; }
-        }
-        .animate-pop { animation: pop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
-    </style>
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="./assets/css/style.css">
 </head>
 <body class="bg-slate-200 text-slate-800 font-sans antialiased min-h-screen flex items-center justify-center p-4 select-none">
 
     <div id="app" class="w-full max-w-md bg-white rounded-3xl shadow-2xl overflow-hidden h-[700px] flex flex-col relative border-4 border-slate-50">
 
-        <!-- ========================================== -->
-        <!-- SCREEN 1: LAYAR LOBBY (ACCORDION) -->
-        <!-- ========================================== -->
+        <!-- SCREEN 1: LOBBY -->
         <div id="screen-lobby" class="flex-1 flex flex-col p-6 bg-slate-50 overflow-y-auto">
             <div class="mb-8 mt-4 text-center">
-                <h1 class="text-3xl font-black text-slate-800 tracking-tight mb-2">Pilih Misimu!</h1>
-                <p class="text-slate-500 font-medium">Bantu selesaikan kekacauan di taman liburan ini.</p>
+                <h1 class="text-3xl font-black text-slate-800 tracking-tight mb-2">Kies je missie!</h1>
+                <p class="text-slate-500 font-medium">Help om de chaos op het vakantiepark op te lossen.</p>
             </div>
-
-            <div class="space-y-4" id="mission-list">
-                <!-- Kotak Accordion 1 -->
-                <div class="mission-card bg-white border-2 border-slate-200 rounded-2xl overflow-hidden shadow-sm transition-all" onclick="toggleAccordion(this)">
-                    <div class="p-5 flex justify-between items-center cursor-pointer bg-blue-50 hover:bg-blue-100 transition-colors">
-                        <div class="flex items-center gap-4">
-                            <span class="text-4xl">🔌</span>
-                            <span class="font-bold text-lg text-slate-700">Krisis WiFi Tamu!</span>
-                        </div>
-                        <span class="text-blue-500 font-black text-xl transition-transform duration-300 arrow">↓</span>
-                    </div>
-                    <div class="accordion-content px-5 bg-white">
-                        <p class="text-slate-600 mb-4 font-medium leading-relaxed">Router utama di area perkemahan mati. Tamu tidak bisa update sosmed. Bisakah kamu memperbaikinya?</p>
-                        <button onclick="startPuzzle('it_router', event)" class="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 rounded-xl shadow-md transition-all active:scale-95">
-                            Mulai Misi (Tech & Logika)
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Kotak Accordion 2 -->
-                <div class="mission-card bg-white border-2 border-slate-200 rounded-2xl overflow-hidden shadow-sm transition-all" onclick="toggleAccordion(this)">
-                    <div class="p-5 flex justify-between items-center cursor-pointer bg-emerald-50 hover:bg-emerald-100 transition-colors">
-                        <div class="flex items-center gap-4">
-                            <span class="text-4xl">🪴</span>
-                            <span class="font-bold text-lg text-slate-700">Taman Berantakan</span>
-                        </div>
-                        <span class="text-emerald-500 font-black text-xl transition-transform duration-300 arrow">↓</span>
-                    </div>
-                    <div class="accordion-content px-5 bg-white">
-                        <p class="text-slate-600 mb-4 font-medium leading-relaxed">Angin kencang semalam membuat pot bunga berserakan di jalan utama. Kembalikan ke tempatnya!</p>
-                        <button onclick="startPuzzle('green_park', event)" class="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-3 rounded-xl shadow-md transition-all active:scale-95">
-                            Mulai Misi (Anak Alam)
-                        </button>
-                    </div>
-                </div>
-            </div>
+            
+            <!-- List misi akan di-generate via JavaScript -->
+            <div class="space-y-4" id="mission-list"></div>
         </div>
 
-        <!-- ========================================== -->
-        <!-- SCREEN 2: RUANG PUZZLE (DRAG & DROP) -->
-        <!-- ========================================== -->
+        <!-- SCREEN 2: PUZZLE ROOM -->
         <div id="screen-puzzle" class="hidden-screen flex-1 flex flex-col p-6 bg-slate-800 text-white relative">
-            <!-- Header Puzzle -->
             <div class="flex justify-between items-center mb-6 z-20">
                 <button onclick="backToLobby()" class="bg-slate-700 hover:bg-slate-600 px-4 py-2 rounded-full font-bold text-sm transition-colors">
-                    ← Kembali
+                    ← Terug
                 </button>
-                <span id="puzzle-title" class="font-black text-lg">Misi Aktif</span>
+                <span id="puzzle-title" class="font-black text-lg">Actieve Missie</span>
             </div>
 
-            <p id="puzzle-instruction" class="text-center font-medium text-slate-300 mb-8 z-20">Instruksi muncul di sini...</p>
+            <p id="puzzle-instruction" class="text-center font-medium text-slate-300 mb-8 z-20">Instructie...</p>
 
-            <!-- Canvas Area Interaksi Fisik -->
             <div class="relative flex-1 bg-slate-900 rounded-2xl border-4 border-slate-700 overflow-hidden shadow-inner flex items-center justify-center">
-                
-                <!-- Target Dropzone (Collider Tujuan) -->
                 <div id="dropzone" class="absolute w-32 h-32 border-4 border-dashed border-slate-600 rounded-2xl flex items-center justify-center bg-slate-800/50 transition-colors z-0">
                     <span id="dropzone-icon" class="text-5xl opacity-50 grayscale">📡</span>
                 </div>
 
-                <!-- Objek Draggable (Player Collider) -->
                 <div id="draggable-item" class="draggable absolute z-10 p-2">
                     <div id="item-icon" class="text-6xl filter drop-shadow-lg hover:scale-110 transition-transform">🔌</div>
                 </div>
-
             </div>
             
-            <!-- Validasi Notifikasi Sukses -->
             <div id="success-overlay" class="absolute inset-0 bg-emerald-500/90 z-30 hidden flex-col items-center justify-center animate-pop backdrop-blur-sm">
                 <div class="text-8xl mb-4">🎉</div>
-                <h2 class="text-3xl font-black mb-2 shadow-sm text-center">Terselesaikan!</h2>
-                <p id="success-message" class="text-emerald-50 font-bold text-center px-6 mb-8">Kerja bagus, jaringan kembali normal!</p>
+                <h2 class="text-3xl font-black mb-2 shadow-sm text-center">Gelukt!</h2>
+                <p id="success-message" class="text-emerald-50 font-bold text-center px-6 mb-8">Goed gedaan!</p>
                 <button onclick="backToLobby()" class="bg-white text-emerald-700 font-black px-8 py-4 rounded-full shadow-lg hover:scale-105 active:scale-95 transition-all">
-                    Pilih Misi Lain
+                    Kies andere missie
                 </button>
             </div>
         </div>
 
     </div>
 
-    <script>
-        // --- 1. DATA MISI (PUZZLE CONFIG) ---
-        const missions = {
-            'it_router': {
-                title: 'Krisis WiFi',
-                instruction: 'Tarik kabel jaringan ke router yang mati!',
-                itemIcon: '🔌',
-                dropIcon: '📡',
-                successMsg: 'Boom! Internet nyala lagi. Dunia rekreasi butuh banget tenaga IT buat ngurus sistem pintar!'
-            },
-            'green_park': {
-                title: 'Taman Berantakan',
-                instruction: 'Geser pot tanaman kembali ke tempat yang ditandai.',
-                itemIcon: '🪴',
-                dropIcon: '🟩',
-                successMsg: 'Taman kembali cantik! Perawatan lanskap luar ruangan adalah kunci kenyamanan tamu.'
-            }
-        };
-
-        const screens = {
-            lobby: document.getElementById('screen-lobby'),
-            puzzle: document.getElementById('screen-puzzle')
-        };
-
-        // --- 2. LOGIKA ACCORDION LOBBY ---
-        function toggleAccordion(element) {
-            // Tutup semua accordion yang sedang terbuka
-            document.querySelectorAll('.mission-card').forEach(card => {
-                if (card !== element) {
-                    card.classList.remove('accordion-open');
-                    card.querySelector('.arrow').style.transform = 'rotate(0deg)';
-                }
-            });
-
-            // Toggle accordion yang diklik
-            element.classList.toggle('accordion-open');
-            const arrow = element.querySelector('.arrow');
-            if (element.classList.contains('accordion-open')) {
-                arrow.style.transform = 'rotate(180deg)';
-            } else {
-                arrow.style.transform = 'rotate(0deg)';
-            }
-        }
-
-        // --- 3. NAVIGASI SCREEN ---
-        function backToLobby() {
-            Object.values(screens).forEach(s => s.classList.add('hidden-screen'));
-            screens.lobby.classList.remove('hidden-screen');
-        }
-
-        function startPuzzle(missionId, event) {
-            event.stopPropagation(); // Mencegah klik tombol menutup accordion
-            
-            // Setel Data Konfigurasi Puzzle
-            const data = missions[missionId];
-            document.getElementById('puzzle-title').innerText = data.title;
-            document.getElementById('puzzle-instruction').innerText = data.instruction;
-            document.getElementById('item-icon').innerText = data.itemIcon;
-            document.getElementById('dropzone-icon').innerText = data.dropIcon;
-            document.getElementById('success-message').innerText = data.successMsg;
-            
-            // Reset Posisi dan State Puzzle
-            resetPuzzleState();
-            
-            // Ganti Layar
-            Object.values(screens).forEach(s => s.classList.add('hidden-screen'));
-            screens.puzzle.classList.remove('hidden-screen');
-        }
-
-        // --- 4. LOGIKA DRAG & DROP & COLLISION (AABB) ---
-        const draggable = document.getElementById('draggable-item');
-        const dropzone = document.getElementById('dropzone');
-        const successOverlay = document.getElementById('success-overlay');
-        
-        let isDragging = false;
-        let startX, startY, initialX, initialY;
-        let xOffset = 0;
-        let yOffset = 0;
-
-        function resetPuzzleState() {
-            successOverlay.classList.add('hidden');
-            successOverlay.classList.remove('flex');
-            dropzone.classList.remove('border-emerald-500', 'bg-emerald-500/30');
-            dropzone.classList.add('border-slate-600', 'bg-slate-800/50');
-            
-            // Acak posisi awal item sedikit agar terasa dinamis
-            xOffset = (Math.random() - 0.5) * 150; 
-            yOffset = (Math.random() - 0.5) * 100 + 80; // Pastikan muncul di area bawah
-            setTranslate(xOffset, yOffset, draggable);
-        }
-
-        // Event Listener Mouse & Touch secara universal (Pointer Events)
-        draggable.addEventListener('pointerdown', dragStart);
-        document.addEventListener('pointermove', drag);
-        document.addEventListener('pointerup', dragEnd);
-
-        function dragStart(e) {
-            initialX = e.clientX - xOffset;
-            initialY = e.clientY - yOffset;
-            isDragging = true;
-        }
-
-        function drag(e) {
-            if (isDragging) {
-                e.preventDefault(); // Mencegah scroll layar HP
-                
-                xOffset = e.clientX - initialX;
-                yOffset = e.clientY - initialY;
-                
-                setTranslate(xOffset, yOffset, draggable);
-                checkCollision();
-            }
-        }
-
-        function setTranslate(xPos, yPos, el) {
-            el.style.transform = `translate3d(${xPos}px, ${yPos}px, 0)`;
-        }
-
-        function dragEnd(e) {
-            initialX = xOffset;
-            initialY = yOffset;
-            isDragging = false;
-            
-            // Validasi akhir saat objek dilepas
-            if (checkCollision()) {
-                triggerSuccess();
-            }
-        }
-
-        // Fungsi Validasi Kotak Pembatas (Bounding Box / Collider 2D Math)
-        function checkCollision() {
-            const dragRect = draggable.getBoundingClientRect();
-            const dropRect = dropzone.getBoundingClientRect();
-
-            // Logika AABB: Cek apakah area kotak saling tumpang tindih
-            const isColliding = !(
-                dragRect.top > dropRect.bottom ||
-                dragRect.right < dropRect.left ||
-                dragRect.bottom < dropRect.top ||
-                dragRect.left > dropRect.right
-            );
-
-            if (isColliding) {
-                dropzone.classList.add('border-emerald-500', 'bg-emerald-500/30');
-                dropzone.classList.remove('border-slate-600', 'bg-slate-800/50');
-                return true;
-            } else {
-                dropzone.classList.remove('border-emerald-500', 'bg-emerald-500/30');
-                dropzone.classList.add('border-slate-600', 'bg-slate-800/50');
-                return false;
-            }
-        }
-
-        function triggerSuccess() {
-            // Kunci objek di tengah target
-            xOffset = 0;
-            yOffset = 0;
-            setTranslate(0, 0, draggable);
-            
-            // Tampilkan animasi pop-up sukses
-            setTimeout(() => {
-                successOverlay.classList.remove('hidden');
-                successOverlay.classList.add('flex');
-            }, 300);
-        }
-    </script>
+    <!-- Hubungkan Data dan Logika Mekanik -->
+    <script src="./assets/js/data.js"></script>
+    <script src="./assets/js/puzzle.js"></script>
 </body>
 </html>
