@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="nl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Beleef de Recreatiebranche — Prototype</title>
+  <link rel="stylesheet" href="style.css">
+  <meta name="description" content="Interactieve, gedeelde ervaring om jongeren te laten ontdekken welke carrières er in de recreatiebranche zijn." />
+</head>
+<body>
+  <header class="site-header">
+    <h1>Beleef de Recreatiebranche</h1>
+    <p class="tag">Ontdek banen van camping tot marina — één korte ronde.</p>
+  </header>
+
+  <main class="container">
+    <section class="controls">
+      <button id="startBtn" class="btn primary">Start</button>
+      <button id="teacherBtn" class="btn">Docentmodus</button>
+      <button id="bigScreenBtn" class="btn">Groot scherm</button>
+      <button id="shareBtn" class="btn">Deel link</button>
+    </section>
+
+    <section id="hook" class="hook">
+      <div class="hook-visual" aria-hidden="true">🧭</div>
+      <div class="hook-text">
+        <h2>Welke rol past bij jou?</h2>
+        <p>Speel één korte ronde (±60 sec). Laat je vrienden kijken — succes is deelbaar.</p>
+      </div>
+    </section>
+
+    <section id="game" class="game hidden">
+      <div id="timer" class="timer">00:45</div>
+      <div id="cards" class="cards"></div>
+      <div id="result" class="result hidden">
+        <h3 id="resultTitle"></h3>
+        <p id="resultDesc"></p>
+        <div class="result-actions">
+          <a id="vacancyLink" class="btn primary" href="#" target="_blank" rel="noopener">Open dagen</a>
+          <button id="resetBtn" class="btn">Volgende speler</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="modules" class="modules">
+      <h3>Module-overzicht (prototype)</h3>
+      <ul>
+        <li>Kiosk: korte ronde, directe reset</li>
+        <li>Shareable link: diepte voor scholen</li>
+        <li>Career Quest: match mechaniek</li>
+        <li>Map Explorer: open dagen en hotspots</li>
+        <li>Docentmodus: aggregaat en lesopdracht</li>
+      </ul>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <small>Prototype — GEEN persoonlijke data. Alleen anonieme tellers.</small>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>
