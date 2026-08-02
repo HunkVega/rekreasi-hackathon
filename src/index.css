@@ -1,0 +1,52 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html, body, #root {
+  height: 100%;
+  overscroll-behavior: none;
+}
+
+body {
+  font-family: 'Manrope', ui-sans-serif, system-ui, sans-serif;
+  background: #0A2C2D;
+  color: #17211F;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.font-display {
+  font-family: 'Baloo 2', ui-rounded, sans-serif;
+}
+
+/* thick comic-style border used throughout for the "campsite signage" signature look */
+.chunky-border {
+  border: 3px solid #0A2C2D;
+}
+
+::selection {
+  background: #FFC145;
+  color: #17211F;
+}
+
+/* visible keyboard focus, respects accessibility */
+:focus-visible {
+  outline: 3px solid #FFC145;
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+.scrollbar-thin::-webkit-scrollbar {
+  width: 8px;
+}
+.scrollbar-thin::-webkit-scrollbar-thumb {
+  background: #0A2C2D33;
+  border-radius: 999px;
+}
