@@ -3,11 +3,11 @@ import { useState } from 'react'
 export default function HotspotPuzzle({ config, onComplete, lang }) {
   const [found, setFound] = useState([])
   
-  // Koordinat titik bahaya di area alam (disimulasikan dengan persentase posisi CSS)
+  // Koordinat titik bahaya di area sungai
   const hotspots = [
-    { id: 1, top: '25%', left: '30%' },
-    { id: 2, top: '65%', left: '75%' },
-    { id: 3, top: '45%', left: '55%' }
+    { id: 1, top: '75%', left: '25%' }, // Batu licin
+    { id: 2, top: '55%', left: '50%' }, // Arus deras
+    { id: 3, top: '35%', left: '75%' }  // Kayu lapuk
   ]
 
   const handleSpotClick = (id) => {
@@ -30,12 +30,12 @@ export default function HotspotPuzzle({ config, onComplete, lang }) {
       
       <div className="relative w-full aspect-video bg-[#5FA777] rounded-3xl border-4 border-dusk2 overflow-hidden shadow-[0_8px_0_0_rgba(10,44,45,1)]">
         
-        {/* Placeholder gambar latar belakang area alam */}
-        <div className="absolute inset-0 flex items-center justify-center bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-80">
-          <span className="font-display font-black text-2xl sm:text-4xl text-dusk2/30 uppercase tracking-[0.2em]">
-            {lang === 'nl' ? 'Natuurgebied' : 'Area Sungai'}
-          </span>
-        </div>
+        {/* Gambar Latar Belakang Asli dari Unsplash */}
+        <img 
+          src="https://images.unsplash.com/photo-1433086966358-54859d0ed716?q=80&w=1000&auto=format&fit=crop" 
+          alt="Area Sungai Deras" 
+          className="absolute inset-0 w-full h-full object-cover opacity-90"
+        />
 
         {/* Render titik-titik Hotspot */}
         {hotspots.map((spot) => {
