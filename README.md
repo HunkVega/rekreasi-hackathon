@@ -1,61 +1,61 @@
-# 🏕️ Petualangan Dunia Rekreasi (Avontuur in Recreatie)
+# 🏕️ Avontuur in Recreatie (Petualangan Dunia Rekreasi)
 
-Sebuah aplikasi web interaktif edukatif yang dirancang untuk memperkenalkan berbagai jalur karier di industri rekreasi dan pariwisata. Menggunakan pendekatan *fail-forward* (tanpa sistem penalti), pengguna dapat bereksplorasi dan belajar melalui *mini-games* interaktif bersama mentor virtual.
+Een educatieve interactieve webapplicatie ontworpen om verschillende carrièrepaden in de recreatie- en toerismesector te introduceren. Met behulp van een *fail-forward* benadering (zonder strafsysteem), kunnen gebruikers vrij verkennen en leren door middel van interactieve minigames met een virtuele mentor.
 
-## ✨ Fitur Utama
-- **Multi-Bahasa (i18n):** Mendukung Bahasa Belanda (NL) sebagai *default* dan Bahasa Indonesia (ID) yang dapat diubah secara *real-time*.
-- **4 Bidang Karier Interaktif:** Hospitality, Teknik & Pemeliharaan, Marketing & Event, serta Alam & Keselamatan.
-- **Fail-Forward Gameplay:** Tidak ada *Game Over*. Pengguna bebas bereksperimen dan belajar dari kesalahan tanpa takut mendapat penalti.
-- **UI/UX Responsif & Tegas:** Desain *chunky-border* dan *hard shadow* yang modern dan ramah pengguna.
-- **Progress Sync:** Menggunakan Supabase untuk menyimpan progres area mana saja yang sudah diselesaikan oleh pengguna.
+## ✨ Belangrijkste Kenmerken
+- **Meertalig (i18n):** Ondersteunt Nederlands (NL) als *default* en Indonesisch (ID) dat in *real-time* kan worden gewijzigd.
+- **4 Interactieve Carrièregebieden:** Gastvrijheid (Hospitality), Techniek & Onderhoud, Marketing & Evenementen, en Natuur & Veiligheid.
+- **Fail-Forward Gameplay:** Geen *Game Over*. Gebruikers zijn vrij om te experimenteren en van fouten te leren zonder bang te hoeven zijn voor strafpunten.
+- **Responsieve & Strakke UI/UX:** Modern en gebruiksvriendelijk *chunky-border* en *hard shadow* ontwerp.
+- **Progress Sync:** Maakt gebruik van Supabase om de voortgang op te slaan van welke gebieden door de gebruiker zijn voltooid.
 
-## 🛠️ Tech Stack
+## 🛠️ Technologie Stack
 - **Frontend:** React.js, Tailwind CSS
 - **Backend/Database:** Supabase
 - **Deployment:** Vercel
 
 ---
 
-## 🗺️ Alur Aplikasi (User Flow)
-*Bagian ini dapat digunakan sebagai referensi utama untuk pembuatan Flowchart sistem.*
+## 🗺️ Applicatiestroom (User Flow)
+*Dit gedeelte kan worden gebruikt als de belangrijkste referentie voor het maken van de systeemflowchart.*
 
-1. **[Start] Akses Aplikasi**
-   - Pengguna membuka *link* Vercel.
-   - Sistem memuat UI utama.
+1. **[Start] Toegang tot de Applicatie**
+   - Gebruiker opent de Vercel-link.
+   - Systeem laadt de hoofd-UI.
 
-2. **[Proses] Pemilihan Bahasa**
-   - Sistem membaca *state* bahasa *default* (NL).
-   - *Decision:* Apakah pengguna mengeklik *toggle* bahasa?
-     - Jika Ya -> Ubah *state* ke (ID), *render* ulang seluruh teks komponen.
-     - Jika Tidak -> Lanjut dengan bahasa saat ini.
+2. **[Proces] Taalkeuze**
+   - Systeem leest de *default* taalstatus (NL).
+   - *Decision:* Klikt de gebruiker op de taal-*toggle*?
+     - Indien Ja -> Verander de *state* naar (ID), *render* alle tekstcomponenten opnieuw.
+     - Indien Nee -> Ga door met de huidige taal.
 
-3. **[Menu Utama] Pemilihan Bidang Karier (Field Selector)**
-   - Menampilkan 4 opsi pintu karier: Hospitality, Teknik, Marketing, Alam.
-   - *Decision:* Pengguna memilih salah satu pintu.
-     - Sistem memuat data bidang (`fields.js`) sesuai pilihan.
+3. **[Hoofdmenu] Carrièregebied Selectie (Field Selector)**
+   - Toont 4 opties voor carrièremogelijkheden: Gastvrijheid, Techniek, Marketing en Natuur.
+   - *Decision:* Gebruiker kiest een van de deuren.
+     - Systeem laadt de gegevens van het gebied (`fields.js`) volgens de keuze.
 
-4. **[Proses] Sesi Dialog Mentor (Dialogue Box)**
-   - Sistem memunculkan karakter mentor terkait (contoh: Kak Nara untuk Hospitality).
-   - Menampilkan narasi pengantar dan instruksi tugas menggunakan elemen *emote* dinamis.
-   - Pengguna menekan tombol "Lanjut" untuk masuk ke *puzzle*.
+4. **[Proces] Mentor Dialoogsessie (Dialogue Box)**
+   - Systeem toont het bijbehorende mentorkarakter (bijv. Kak Nara voor Gastvrijheid).
+   - Toont het inleidende verhaal en de taakinstructies met dynamische *emote*-elementen.
+   - Gebruiker drukt op de knop "Verder" (Lanjut) om naar de *puzzle* te gaan.
 
-5. **[Interaksi] Sesi Mini-Game (Berdasarkan Pilihan Bidang)**
-   - **Tipe A (Hospitality):** *Matching Puzzle* -> Pengguna mencocokkan situasi tamu dengan tindakan yang tepat.
-   - **Tipe B (Teknik):** *Sequence Puzzle* -> Pengguna menyusun urutan langkah perbaikan genset.
-   - **Tipe C (Marketing):** *Word Order Puzzle* -> Pengguna menyusun acakan kata menjadi kalimat promo.
-   - **Tipe D (Alam):** *Hotspot Puzzle* -> Pengguna mencari dan mengeklik 3 titik bahaya pada gambar visual.
+5. **[Interactie] Mini-Game Sessie (Gebaseerd op Gebiedskeuze)**
+   - **Type A (Gastvrijheid):** *Matching Puzzle* -> Gebruiker matcht de klantsituatie met de juiste actie.
+   - **Type B (Techniek):** *Sequence Puzzle* -> Gebruiker ordent de stappen voor het repareren van de generator.
+   - **Type C (Marketing):** *Word Order Puzzle* -> Gebruiker rangschikt de door elkaar gehusselde woorden tot een promozin.
+   - **Type D (Natuur):** *Hotspot Puzzle* -> Gebruiker zoekt en klikt op 3 gevarenzones op een visuele afbeelding.
 
-6. **[Validasi] Sistem Fail-Forward**
-   - *Decision:* Apakah jawaban/interaksi pengguna benar?
-     - Jika Salah -> Berikan efek visual/animasi (misal: warna merah sejenak, atau diam), reset pilihan, **tanpa mengurangi nyawa**. Pengguna mencoba lagi.
-     - Jika Benar -> Lanjut ke tahap berikutnya.
+6. **[Validatie] Fail-Forward Systeem**
+   - *Decision:* Is het antwoord/de interactie van de gebruiker correct?
+     - Indien Onjuist -> Geef een visueel/animatie effect (bijv. even rood kleuren of geen reactie), reset de keuze, **zonder levens te verminderen**. Gebruiker probeert het opnieuw.
+     - Indien Juist -> Ga door naar de volgende fase.
 
-7. **[Output] Feedback & Edukasi**
-   - Menampilkan pesan apresiasi dan wawasan/fakta menarik mengenai bidang karier tersebut.
-   - Supabase menyimpan progres (`completed: true` untuk bidang tersebut).
+7. **[Output] Feedback & Educatie**
+   - Toont een waarderingsbericht en interessante inzichten/feiten over het carrièregebied.
+   - Supabase slaat de voortgang op (`completed: true` voor dat gebied).
 
-8. **[Looping / End] Pengecekan Progres**
-   - Sistem mengecek total bidang yang telah diselesaikan.
-   - *Decision:* Apakah ke-4 bidang sudah selesai?
-     - Jika Belum -> Kembali ke [Menu Utama] (Langkah 3), pintu yang selesai dilabeli "SELESAI".
-     - Jika Sudah -> Tampilkan pesan "Semua bidang selesai dijelajahi! 🎉" dan akses ke *link* lowongan/Open Day.
+8. **[Looping / End] Voortgangscontrole**
+   - Systeem controleert het totale aantal voltooide gebieden.
+   - *Decision:* Zijn alle 4 de gebieden voltooid?
+     - Indien Nog niet -> Terug naar [Hoofdmenu] (Stap 3), de voltooide deuren krijgen het label "VOLTOOID" (Klaar).
+     - Indien Wel -> Toon het bericht "Alle gebieden zijn verkend! 🎉" en geef toegang tot de link voor vacatures/Open Dag.
