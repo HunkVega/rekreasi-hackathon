@@ -18,12 +18,36 @@ const resetBtn = document.getElementById('resetBtn');
 const shareBtn = document.getElementById('shareBtn');
 
 function makeCard(role){
-  const el = document.createElement('button');
-  el.className='card';
-  el.type='button';
+  // build a flippable card with front/back faces and a choose button
+  const el = document.createElement('div');
+  el.className = 'card';
   el.setAttribute('role','listitem');
-  el.innerHTML = `<strong>${role.title}</strong><small>${role.short}</small>`;
-  el.addEventListener('click',()=>selectRole(role));
+  el.tabIndex = 0;
+
+  const inner = document.createElement('div'); inner.className='card-inner';
+  const front = document.createElement('div'); front.className='card-face card-front';
+  front.innerHTML = `<strong>${role.title}</strong><small>${role.short}</small>`;
+  const back = document.createElement('div'); back.className='card-face card-back';
+  back.innerHTML = `<div style="font-size:13px">${role.desc}</div>`;
+
+  const choose = document.createElement('button'); choose.className='btn primary chooseBtn'; choose.textContent = 'Kies';
+  choose.style.marginTop = '8px'; choose.addEventListener('click', ev=>{
+    ev.stopPropagation();
+    // register choice: increment counts, sync, and show result
+    incrementCount(role.id);
+    scheduleSupabaseSync();
+    // visual feedback and result
+    startConfetti();
+    // short delay to let confetti begin
+    setTimeout(()=>{ stopConfetti(); showResult(role); }, 650);
+  });
+
+  back.appendChild(choose);
+  inner.appendChild(front); inner.appendChild(back); el.appendChild(inner);
+
+  // flip on click / keyboard
+  el.addEventListener('click', ()=>{ if(!el.classList.contains('flipped')) el.classList.add('flipped'); });
+  el.addEventListener('keydown', e=>{ if(e.key==='Enter' || e.key===' ') el.classList.toggle('flipped'); });
   return el;
 }
 
@@ -56,7 +80,10 @@ function deterministicShuffle(arr){
 }
 
 function selectRole(role){
-  // brief animation then show result
+  // play small tap animation on other cards and reveal result
+  // disable other cards to avoid multiple selections
+  Array.from(cardsEl.querySelectorAll('.card')).forEach(c=>{ if(!c.classList.contains('disabled')) c.classList.add('disabled'); });
+  // small delay already used when flipping; showResult will handle counts
   showResult(role);
 }
 
@@ -68,18 +95,79 @@ function showResult(role){
     resultTitle.textContent = `Misschien: ${role.title}`;
     resultDesc.textContent = role.desc + ' Dit kan een eerste stap zijn in jouw carrière.';
     document.getElementById('vacancyLink').href = 'https://hiswarecron.nl/placeholder-vacatures';
+    // celebrate with confetti (burst once)
+    try{ confettiBurst(); }catch(e){}
   } else {
     resultTitle.textContent = 'Tijd op';
     resultDesc.textContent = 'De ronde is voorbij — druk op Volgende speler om te resetten.';
   }
+  // small visual focus
+  result.classList.add('pop'); setTimeout(()=>result.classList.remove('pop'),900);
   // ensure visible on small screens
   result.scrollIntoView({behavior:'smooth',block:'center'});
 }
+
+// --- Confetti (lightweight, no external libs) ---
+let _confettiCanvas = null; let _confettiCtx = null; let _confettiParticles = [];
+function ensureConfettiCanvas(){
+  if(_confettiCanvas) return;
+  const c = document.createElement('canvas'); c.className = 'confetti-canvas'; c.width = innerWidth; c.height = innerHeight; document.body.appendChild(c);
+  _confettiCanvas = c; _confettiCtx = c.getContext('2d');
+  window.addEventListener('resize', ()=>{ if(_confettiCanvas){ _confettiCanvas.width = innerWidth; _confettiCanvas.height = innerHeight; } });
+}
+
+function confettiBurst(){
+  ensureConfettiCanvas();
+  // generate ~40 particles
+  const count = 40; const colors = ['#ffb703','#fb5607','#3a86ff','#8338ec','#06d6a0'];
+  for(let i=0;i<count;i++){
+    _confettiParticles.push({
+      x: innerWidth/2 + (Math.random()-0.5)*200,
+      y: innerHeight/3 + (Math.random()-0.5)*80,
+      vx: (Math.random()-0.5)*6,
+      vy: Math.random()*-6 - 2,
+      size: 6 + Math.random()*8,
+      color: colors[Math.floor(Math.random()*colors.length)],
+      rot: Math.random()*360,
+      vr: (Math.random()-0.5)*10,
+      life: 60 + Math.floor(Math.random()*60)
+    });
+  }
+  runConfettiLoop();
+}
+
+let _confettiRunning = false;
+function runConfettiLoop(){
+  if(_confettiRunning) return; _confettiRunning = true;
+  function step(){
+    if(!_confettiCanvas) { _confettiRunning=false; return; }
+    const ctx = _confettiCtx; ctx.clearRect(0,0,_confettiCanvas.width,_confettiCanvas.height);
+    for(let i=_confettiParticles.length-1;i>=0;i--){
+      const p = _confettiParticles[i];
+      p.vy += 0.25; p.x += p.vx; p.y += p.vy; p.rot += p.vr; p.life--;
+      ctx.save(); ctx.translate(p.x,p.y); ctx.rotate(p.rot*Math.PI/180);
+      ctx.fillStyle = p.color; ctx.fillRect(-p.size/2, -p.size/2, p.size, p.size*0.6);
+      ctx.restore();
+      if(p.y > innerHeight + 50 || p.life <= 0) _confettiParticles.splice(i,1);
+    }
+    if(_confettiParticles.length>0){ requestAnimationFrame(step); } else { ctx.clearRect(0,0,_confettiCanvas.width,_confettiCanvas.height); _confettiRunning=false; }
+  }
+  requestAnimationFrame(step);
+}
+
+// convenience start/stop wrappers to avoid multiple canvases
+function startConfetti(){ confettiBurst(); }
+function stopConfetti(){ _confettiParticles = []; }
 
 function resetGame(){
   result.classList.add('hidden');
   game.classList.add('hidden');
   hook.classList.remove('hidden');
+  // clear timer interval if any
+  const iv = game.dataset.timer; if(iv) try{ clearInterval(iv); }catch(e){}
+  delete game.dataset.timer;
+  // reset cards
+  Array.from(cardsEl.children).forEach(c=>{ c.classList.remove('flipped','selected'); c.style.pointerEvents='auto'; });
 }
 
 startBtn.addEventListener('click',startGame);
@@ -173,22 +261,29 @@ function getSupabaseConfig(){
 }
 
 async function sendCountsToSupabase(counts){
-  const cfg = getSupabaseConfig();
-  if(!cfg) return;
+  // prefer serverless proxy on the same host (Vercel) to keep anon keys off the client
   try{
-    const endpoint = cfg.url.replace(/\/$/,'') + '/rest/v1/rec_counts?on_conflict=id';
-    const body = [{id:'aggregated', counts}];
-    await fetch(endpoint, {
-      method:'POST',
-      headers:{
-        'Content-Type':'application/json',
-        'apikey': cfg.key,
-        'Authorization': 'Bearer ' + cfg.key,
-        'Prefer':'return=representation'
-      },
-      body: JSON.stringify(body)
-    });
-  }catch(e){ console.warn('Supabase sync failed', e); }
+    const r = await fetch('/api/sync-counts', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({counts})});
+    if(!r.ok) console.warn('Server sync failed', await r.text());
+  }catch(e){
+    // fallback: try direct client-side only if user configured SUPABASE_URL/KEY
+    const cfg = getSupabaseConfig();
+    if(!cfg) return;
+    try{
+      const endpoint = cfg.url.replace(/\/$/,'') + '/rest/v1/rec_counts?on_conflict=id';
+      const body = [{id:'aggregated', counts}];
+      await fetch(endpoint, {
+        method:'POST',
+        headers:{
+          'Content-Type':'application/json',
+          'apikey': cfg.key,
+          'Authorization': 'Bearer ' + cfg.key,
+          'Prefer':'return=representation'
+        },
+        body: JSON.stringify(body)
+      });
+    }catch(err){ console.warn('Direct supabase failed', err); }
+  }
 }
 
 // call supabase sync in a debounced way to reduce network calls

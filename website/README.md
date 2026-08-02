@@ -38,8 +38,18 @@ create table public.rec_counts (
 - Upsert voorbeeld (client-side) gebruikt de REST endpoint `POST /rest/v1/rec_counts?on_conflict=id` met headers `apikey` and `Authorization: Bearer <anon key>`.
 - Hoe te configureren in prototype: klik `Configure Supabase` en plak je `SUPABASE_URL` (zoals `https://xyz.supabase.co`) en je `ANON_KEY`. De prototype zal proberen te upserten en melde fouten in de console.
 
+Server-side (Vercel) recommended
+- Untuk host di Vercel, saya menambahkan serverless endpoint `api/sync-counts.js` yang menerima POST `{ counts }` dan melakukan upsert ke Supabase menggunakan env vars `SUPABASE_URL` dan `SUPABASE_KEY`.
+- Setup langkah:
+	1. Di dashboard Vercel project → Settings → Environment Variables tambahkan:
+		 - `SUPABASE_URL` = `https://...supabase.co`
+		 - `SUPABASE_KEY` = (your service/anon key)
+	2. Deploy ke Vercel (push ke repo). Endpoint akan tersedia di `/api/sync-counts`.
+	3. Prototype di browser sekarang memanggil `/api/sync-counts` saat counts berubah.
+
 Veiligheid en RLS:
-- Voor demo en hackathon kun je tijdelijk gebruik maken van de anon key. Voor produksi, definieer Row Level Security regels en RPC-functies untuk mengatur apa yang diizinkan.
+- Jangan pernah commit kunci pada repo. Gunakan Environment Variables di Vercel.
+- Untuk produksi: gunakan Row Level Security (RLS) di Supabase dan berikan hanya hak yang diperlukan untuk endpoint ini. Pertimbangkan membuat fungsi (RPC) yang menyaring input sebelum menyimpan.
 
 
 Deployment:
