@@ -1,107 +1,86 @@
-import { useMemo, useState } from 'react'
+import { useState, useEffect } from 'react'
 
-function shuffle(arr) {
-  const a = [...arr]
-  for (let i = a.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1))
-    ;[a[i], a[j]] = [a[j], a[i]]
-  }
-  return a
-}
+export default function WordOrderPuzzle({ config, onComplete, lang }) {
+  const [words, setWords] = useState([])
+  const [selected, setSelected] = useState([])
+  const [isError, setIsError] = useState(false)
 
-// Splits target into displayable word tokens (keeps punctuation attached).
-function tokenize(target) {
-  return target.split(' ').filter(Boolean)
-}
+  // Ambil target kalimat berdasarkan bahasa yang aktif
+  const targetSentence = config.target[lang]
+  const targetWords = targetSentence.split(' ')
 
-export default function WordOrderPuzzle({ config, accent, onComplete }) {
-  const targetWords = useMemo(() => tokenize(config.target), [config])
-  const pool = useMemo(
-    () => shuffle(targetWords.map((text, id) => ({ id, text }))),
-    [targetWords]
-  )
+  useEffect(() => {
+    // Acak urutan kata setiap kali komponen dimuat
+    const shuffled = [...targetWords].sort(() => Math.random() - 0.5)
+    setWords(shuffled.map((word, id) => ({ id, text: word })))
+    setSelected([])
+  }, [lang, targetSentence])
 
-  const [placed, setPlaced] = useState([]) // ids in chosen order
-  const [shakeKey, setShakeKey] = useState(0)
-  const [wrong, setWrong] = useState(false)
-  const done = placed.length === targetWords.length
+  const handleSelect = (word) => {
+    if (selected.find(w => w.id === word.id)) return
+    
+    const newSelected = [...selected, word]
+    setSelected(newSelected)
 
-  const place = (id) => {
-    if (placed.includes(id) || done) return
-    setPlaced((p) => [...p, id])
-  }
-
-  const removeLast = () => {
-    setPlaced((p) => p.slice(0, -1))
-    setWrong(false)
-  }
-
-  const check = () => {
-    const ok = placed.every((id, i) => id === i) // words authored in correct target order => id order == 0..n-1
-    if (ok) {
-      setTimeout(() => onComplete(), 500)
-    } else {
-      setWrong(true)
-      setShakeKey((k) => k + 1)
+    // Cek apakah jumlah kata yang dipilih sudah sesuai dengan target
+    if (newSelected.length === targetWords.length) {
+      const formedSentence = newSelected.map(w => w.text).join(' ')
+      if (formedSentence === targetSentence) {
+        // Jika benar, panggil onComplete
+        setTimeout(() => onComplete(), 500)
+      } else {
+        // Jika salah urutan, beri efek error lalu reset
+        setIsError(true)
+        setTimeout(() => {
+          setSelected([])
+          setIsError(false)
+        }, 1000)
+      }
     }
   }
 
+  const handleDeselect = (word) => {
+    setSelected(selected.filter(w => w.id !== word.id))
+  }
+
   return (
-    <div className="w-full h-full flex flex-col items-center px-4 sm:px-8 py-6 sm:py-10 overflow-y-auto scrollbar-thin">
-      <div className="w-full max-w-2xl">
-        <p className="font-display font-bold text-sand text-xl sm:text-2xl mb-1 text-center">Susun Caption Promosi</p>
-        <p className="text-sand/70 text-sm sm:text-base text-center mb-6">{config.instruction}</p>
+    <div className="flex flex-col gap-6 w-full">
+      <p className="font-body text-sand font-bold text-center text-sm sm:text-base bg-dusk2/40 px-4 py-3 rounded-xl border-2 border-dusk2/20">
+        {config.instruction[lang]}
+      </p>
+      
+      {/* Area Jawaban (Drop zone) */}
+      <div className={`min-h-[120px] p-5 rounded-3xl border-4 border-dusk2 shadow-[inset_0_4px_0_0_rgba(10,44,45,0.1)] bg-sand flex flex-wrap gap-2 items-start transition-colors duration-300 ${isError ? 'bg-coral/20 border-coral' : ''}`}>
+        {selected.map((word) => (
+          <button
+            key={word.id}
+            onClick={() => handleDeselect(word)}
+            className="font-display font-black text-sm sm:text-base bg-dusk2 text-sand px-4 py-2 rounded-xl shadow-[0_4px_0_0_rgba(23,33,31,1)] active:translate-y-1 active:shadow-none transition-all"
+          >
+            {word.text}
+          </button>
+        ))}
+      </div>
 
-        <div
-          key={shakeKey}
-          className={`bg-sand rounded-2xl chunky-border p-4 sm:p-5 mb-6 min-h-[80px] flex flex-wrap gap-2 items-center content-start ${wrong ? 'animate-shake' : ''}`}
-        >
-          {placed.length === 0 && (
-            <span className="text-ink/40 text-sm italic px-1">Susun kalimatnya di sini…</span>
-          )}
-          {placed.map((id, i) => (
-            <span
-              key={id}
-              className="bg-dusk2 text-sand font-display font-semibold text-sm sm:text-base px-3 py-1.5 rounded-lg animate-popin"
+      {/* Pilihan Kata (Word Bank) */}
+      <div className="flex flex-wrap gap-3 justify-center mt-2">
+        {words.map((word) => {
+          const isSelected = selected.find(w => w.id === word.id)
+          return (
+            <button
+              key={word.id}
+              onClick={() => handleSelect(word)}
+              disabled={isSelected}
+              className={`font-display font-black text-sm sm:text-base px-4 py-2 rounded-xl transition-all duration-200 ${
+                isSelected 
+                  ? 'bg-dusk2/20 text-dusk2/40 border-4 border-transparent scale-95 cursor-not-allowed shadow-none' 
+                  : 'bg-sun text-dusk2 border-4 border-dusk2 shadow-[0_4px_0_0_rgba(10,44,45,1)] hover:-translate-y-1 hover:shadow-[0_6px_0_0_rgba(10,44,45,1)] active:translate-y-1 active:shadow-none'
+              }`}
             >
-              {pool.find((w) => w.id === id).text}
-            </span>
-          ))}
-        </div>
-
-        <div className="flex flex-wrap gap-2 justify-center mb-6">
-          {pool.map((w) => {
-            const used = placed.includes(w.id)
-            return (
-              <button
-                key={w.id}
-                disabled={used}
-                onClick={() => place(w.id)}
-                className={`font-display font-semibold text-sm sm:text-base px-3 py-1.5 rounded-lg chunky-border transition-all
-                  ${used ? 'opacity-30 cursor-default' : 'bg-sun hover:-translate-y-0.5'}`}
-              >
-                {w.text}
-              </button>
-            )
-          })}
-        </div>
-
-        <div className="flex items-center justify-center gap-3">
-          <button
-            onClick={removeLast}
-            disabled={placed.length === 0}
-            className="text-sand/70 text-xs sm:text-sm font-semibold underline underline-offset-2 disabled:opacity-30"
-          >
-            Hapus kata terakhir
-          </button>
-          <button
-            onClick={check}
-            disabled={!done}
-            className="font-display font-bold text-sm sm:text-base bg-coral text-sand px-5 py-2.5 rounded-full disabled:opacity-30 hover:brightness-110 active:scale-95 transition-all"
-          >
-            Periksa Kalimat ▸
-          </button>
-        </div>
+              {word.text}
+            </button>
+          )
+        })}
       </div>
     </div>
   )
