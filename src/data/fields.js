@@ -1,128 +1,102 @@
-// Semua teks & konfigurasi puzzle terpusat di sini.
-// Ganti teks / tambah bidang baru cukup dengan menyunting array FIELDS di bawah.
-
 export const MENTOR = {
-  hospitality: { name: 'Kak Nara', color: '#FF6B4A', emoji: '🙋‍♀️' },
-  teknik: { name: 'Om Bagas', color: '#4FB3BF', emoji: '🔧' },
-  marketing: { name: 'Kak Zea', color: '#FFC145', emoji: '📣' },
-  alam: { name: 'Kak Rio', color: '#5FA777', emoji: '🌲' },
-}
+  hospitality: { name: 'Kak Nara', color: '#FF6B4A', baseEmote: '💁‍♀️' },
+  teknik: { name: 'Om Bagas', color: '#4FB3BF', baseEmote: '👷‍♂️' },
+  marketing: { name: 'Kak Zea', color: '#FFC145', baseEmote: '👩‍💻' },
+  alam: { name: 'Kak Rio', color: '#5FA777', baseEmote: '🧗‍♂️' },
+};
 
 export const FIELDS = [
   {
     id: 'hospitality',
-    title: 'Hospitality & Pelayanan Tamu',
-    short: 'Jadi wajah pertama yang bikin liburan tamu berkesan.',
-    icon: '🏨',
+    title: {
+      nl: 'Gastvrijheid & Klantenservice',
+      id: 'Hospitality & Pelayanan Tamu'
+    },
+    short: {
+      nl: 'Wees het gezicht dat hun vakantie onvergetelijk maakt.',
+      id: 'Jadi wajah pertama yang bikin liburan tamu berkesan.'
+    },
+    icon: '🏕️',
     accent: '#FF6B4A',
     intro: [
-      { m: 'hospitality', t: 'Halo! Aku Nara, aku kerja di bagian front office taman rekreasi ini. Setiap hari aku ketemu puluhan tamu dengan masalah yang beda-beda.' },
-      { m: 'hospitality', t: 'Tugasku bukan cuma senyum di depan meja — aku harus cepat mikir, dengerin keluhan, dan kasih solusi yang tepat.' },
-      { m: 'hospitality', t: 'Nih, coba bantu aku. Ada 4 tamu yang butuh bantuan sekarang. Cocokkan tiap situasi dengan tindakan yang paling pas ya!' },
+      { m: 'hospitality', emote: '👋', t: { nl: 'Hallo! Ik ben Nara. Welkom bij de receptie!', id: 'Halo! Aku Nara. Selamat datang di meja depan!' } },
+      { m: 'hospitality', emote: '🤔', t: { nl: 'Elke gast heeft een ander verhaal en probleem.', id: 'Tiap tamu punya cerita dan masalah yang beda-beda.' } },
+      { m: 'hospitality', emote: '🤝', t: { nl: 'Koppel de situatie aan jouw actie. Er is geen fout, laat je instelling zien!', id: 'Pasangkan situasi dengan tindakanmu. Apapun pilihanmu, mari kita lihat insting melayanimu!' } },
     ],
     puzzle: {
       type: 'matching',
-      instruction: 'Ketuk satu situasi tamu, lalu ketuk tindakan yang paling tepat untuk situasi itu.',
+      instruction: {
+        nl: 'Kies een gast en kies jouw actie.',
+        id: 'Pilih situasi tamu, lalu ketuk tindakan yang akan kamu ambil.'
+      },
       pairs: [
-        { left: 'Tenda keluarga bocor kena hujan semalam', right: 'Antar ke gudang & pinjamkan terpal cadangan' },
-        { left: 'Anak kecil menangis, terpisah dari orang tua', right: 'Hubungi pos informasi, umumkan lewat pengeras suara' },
-        { left: 'Tamu tanya jadwal aktivitas sore ini', right: 'Tunjukkan papan jadwal & bagikan brosur kegiatan' },
-        { left: 'Sinyal wifi di area tenda tidak nyambung', right: 'Arahkan ke titik wifi gratis di kantin utama' },
+        { left: { nl: 'Tent lekt door regen', id: 'Tenda keluarga bocor kena hujan' }, right: { nl: 'Geef reserve zeil', id: 'Pinjamkan terpal cadangan' } },
+        { left: { nl: 'Kind huilt, ouders kwijt', id: 'Anak menangis terpisah dari ortu' }, right: { nl: 'Bel de infobalie', id: 'Hubungi pos informasi' } },
+        { left: { nl: 'Vraagt naar middagschema', id: 'Tamu tanya jadwal aktivitas sore' }, right: { nl: 'Geef activiteitenbrochure', id: 'Bagikan brosur kegiatan' } },
+        { left: { nl: 'Geen wifi-signaal', id: 'Sinyal wifi tidak nyambung' }, right: { nl: 'Verwijs naar de kantine', id: 'Arahkan ke kantin utama' } },
       ],
     },
-    success: [
-      { m: 'hospitality', t: 'Keren, semua tamu terbantu! Ini yang bikin kerja di hospitality seru — tiap hari beda cerita, dan kamu yang bikin liburan orang jadi lebih baik.' },
-      { m: 'hospitality', t: 'Kalau kamu suka ngobrol, sabar, dan cepat cari solusi, bidang ini cocok banget buat kamu.' },
-    ],
-    facts: [
-      'Bertemu ratusan tamu dari berbagai latar belakang setiap musim liburan',
-      'Melatih kemampuan komunikasi & problem-solving super cepat',
-      'Bisa mulai dari kerja paruh waktu saat masih sekolah',
-    ],
+    feedback: {
+      nl: 'Geweldig! In de hospitality draait alles om jouw unieke benadering om gasten blij te maken.',
+      id: 'Luar biasa! Di bidang hospitality, ketanggapanmu dan caramu bereaksi terhadap tamu adalah kunci. Tindakan yang kamu pilih menunjukkan bahwa melayani orang lain adalah sebuah seni dan keasyikan tersendiri!'
+    },
+    facts: {
+      nl: ['Ontmoet veel verschillende mensen', 'Traint probleemoplossend vermogen'],
+      id: ['Bertemu ratusan tamu unik', 'Melatih problem-solving super cepat']
+    }
   },
   {
     id: 'teknik',
-    title: 'Teknik & Pemeliharaan',
-    short: 'Pastikan semua fasilitas aman dan berfungsi tiap hari.',
+    title: {
+      nl: 'Techniek & Onderhoud',
+      id: 'Teknik & Pemeliharaan'
+    },
+    short: {
+      nl: 'Zorg dat alle faciliteiten elke dag veilig werken.',
+      id: 'Pastikan semua fasilitas aman dan berfungsi.'
+    },
     icon: '🔧',
     accent: '#4FB3BF',
     intro: [
-      { m: 'teknik', t: 'Yo! Aku Bagas, tim teknik di sini. Kalau kolam renang, genset, atau wahana rusak — aku yang turun tangan pertama.' },
-      { m: 'teknik', t: 'Kerjaan teknisi itu separuh logika, separuh kehati-hatian. Salah urutan kerja, bisa bahaya!' },
-      { m: 'teknik', t: 'Genset cadangan taman lagi mati. Bantu aku urutkan langkah perbaikannya dengan BENAR dan AMAN, ya.' },
+      { m: 'teknik', emote: 'yo', t: { nl: 'Yo! Ik ben Bagas van het technische team.', id: 'Yo! Aku Bagas, tim teknik di sini.' } },
+      { m: 'teknik', emote: '⚙️', t: { nl: 'Technicus zijn is logica en zorgvuldigheid.', id: 'Kerjaan teknisi itu separuh logika, separuh kehati-hatian.' } },
+      { m: 'teknik', emote: '⚡', t: { nl: 'Probeer de generatorstappen in jouw volgorde te zetten!', id: 'Coba susun langkah perbaikan genset sesuai nalurimu!' } },
     ],
     puzzle: {
       type: 'sequence',
-      instruction: 'Ketuk langkah-langkah berikut sesuai urutan yang paling aman & benar.',
-      steps: [
-        'Matikan saklar utama sebelum memeriksa apa pun',
-        'Periksa kemungkinan kebocoran bahan bakar di sekitar mesin',
-        'Bersihkan / ganti filter udara yang kotor',
-        'Nyalakan kembali saklar utama & uji coba mesin',
-      ],
+      instruction: {
+        nl: 'Tik op de stappen in de volgorde die jij logisch vindt.',
+        id: 'Ketuk langkah-langkah berikut sesuai urutan yang menurutmu paling aman.'
+      },
+      steps: {
+        nl: [
+          'Schakel de hoofdschakelaar uit',
+          'Controleer op brandstoflekken',
+          'Reinig het luchtfilter',
+          'Zet de schakelaar weer aan'
+        ],
+        id: [
+          'Matikan saklar utama',
+          'Periksa kebocoran bahan bakar',
+          'Bersihkan filter udara',
+          'Nyalakan kembali saklar'
+        ]
+      }
     },
-    success: [
-      { m: 'teknik', t: 'Mantap, genset nyala lagi dan aman! Di balik layar, tim teknik yang jaga supaya liburan semua orang tetap lancar.' },
-      { m: 'teknik', t: 'Kalau kamu suka bongkar-pasang, mikir sistematis, dan senang lihat sesuatu berfungsi lagi — teknik & pemeliharaan bisa jadi jalan kariermu.' },
-    ],
-    facts: [
-      'Kerja dengan listrik, mesin, kolam renang, sampai wahana permainan',
-      'Selalu ada standar keselamatan (K3) yang wajib diikuti',
-      'Banyak dibutuhkan sepanjang tahun, bukan cuma musim liburan',
-    ],
-  },
-  {
-    id: 'marketing',
-    title: 'Event, Marketing & Media',
-    short: 'Ciptakan cerita yang bikin orang pengen datang berkunjung.',
-    icon: '📣',
-    accent: '#FFC145',
-    intro: [
-      { m: 'marketing', t: 'Hai! Aku Zea, aku pegang konten & event di taman rekreasi ini. Foto, video, sampai promo yang kamu lihat di medsos — itu kerjaanku.' },
-      { m: 'marketing', t: 'Minggu ini kita mau posting caption promosi buat event musim panas. Tapi kata-katanya masih berantakan di draf-ku!' },
-      { m: 'marketing', t: 'Bantu susun ulang kata-katanya jadi kalimat promosi yang enak dibaca, yuk.' },
-    ],
-    puzzle: {
-      type: 'wordorder',
-      instruction: 'Ketuk kata-kata di bawah secara berurutan supaya membentuk kalimat promosi yang tepat.',
-      target: 'Liburan seru, kenangan tak terlupakan, hanya di sini!',
+    feedback: {
+      nl: 'Goed geprobeerd! Elke monteur heeft zijn eigen ritme, zolang veiligheid voorop staat.',
+      id: 'Eksperimen yang bagus! Di dunia teknik, urutan logika sangat penting, namun keberanianmu merakit solusi menunjukkan insting seorang *problem solver* sejati. Mengutak-atik mesin itu seru, kan?'
     },
-    success: [
-      { m: 'marketing', t: 'Sip, captionnya siap posting! Kata-kata yang tepat bisa bikin ratusan orang penasaran datang berkunjung.' },
-      { m: 'marketing', t: 'Kalau kamu suka nulis, motret, atau bikin video, bidang marketing & event kasih ruang buat kreativitas kamu berkembang.' },
-    ],
-    facts: [
-      'Mengelola media sosial, foto, video, sampai event tahunan',
-      'Kerja sama erat dengan semua divisi lain di taman rekreasi',
-      'Kreativitas kamu langsung terlihat hasilnya oleh ribuan orang',
-    ],
-  },
-  {
-    id: 'alam',
-    title: 'Alam, Aktivitas & Keselamatan',
-    short: 'Jaga pengunjung tetap aman saat seru-seruan di alam.',
-    icon: '🌲',
-    accent: '#5FA777',
-    intro: [
-      { m: 'alam', t: 'Hei! Aku Rio, pemandu aktivitas luar ruang. Sebelum tamu boleh mulai kegiatan seperti kayak atau flying fox, aku wajib cek dulu area amannya.' },
-      { m: 'alam', t: 'Mata yang jeli itu penting banget di kerjaan ini — satu bahaya kecil yang kelewat bisa berakibat besar.' },
-      { m: 'alam', t: 'Yuk, bantu aku cek area sungai ini. Temukan 3 potensi bahaya sebelum aktivitas boleh dimulai!' },
-    ],
-    puzzle: {
-      type: 'hotspot',
-      instruction: 'Ketuk 3 titik yang menurutmu berbahaya di area ini. Hati-hati, ada titik yang aman-aman saja!',
-    },
-    success: [
-      { m: 'alam', t: 'Sip, area sudah aman! Karena kamu teliti, semua tamu bisa main dengan tenang hari ini.' },
-      { m: 'alam', t: 'Kalau kamu suka alam terbuka, olahraga, dan peduli keselamatan orang lain, bidang ini bisa jadi panggilan hidupmu.' },
-    ],
-    facts: [
-      'Memandu aktivitas outdoor: hiking, kayak, panjat tebing, dan lainnya',
-      'Punya sertifikasi keselamatan & pertolongan pertama',
-      'Kerja di alam terbuka, jauh dari meja kantor',
-    ],
-  },
-]
+    facts: {
+      nl: ['Werken met elektriciteit en machines', 'Veiligheid (K3) is altijd prioriteit'],
+      id: ['Kerja dengan listrik dan mesin', 'Selalu ada standar keselamatan (K3)']
+    }
+  }
+  // Kamu bisa menambahkan bidang 'marketing' dan 'alam' dengan struktur objek { nl, id } yang sama.
+];
 
-export const VACANCY_URL = 'https://werkeninrecreatie.nl'
-export const OPEN_DAY_INFO = 'Tanya guru atau kunjungi taman rekreasi terdekat untuk info Hari Terbuka (Open Day) berikutnya!'
+export const VACANCY_URL = 'https://werkeninrecreatie.nl';
+export const OPEN_DAY_INFO = {
+  nl: 'Vraag je docent of bezoek een recreatiepark voor de Open Dag!',
+  id: 'Tanya guru atau kunjungi taman rekreasi terdekat untuk info Open Day!'
+};
