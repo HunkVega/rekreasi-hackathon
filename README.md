@@ -27,7 +27,7 @@ untuk booth/pameran (mis. LOP X).
 ```bash
 npm install
 npm run dev
-```
+``` 
 
 Buka `http://localhost:5173`.
 
