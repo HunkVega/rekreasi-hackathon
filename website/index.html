@@ -9,30 +9,43 @@
 </head>
 <body>
   <header class="site-header">
-    <h1>Beleef de Recreatiebranche</h1>
-    <p class="tag">Ontdek banen van camping tot marina — één korte ronde.</p>
+    <div class="brand">
+      <div class="logo" aria-hidden="true">🏕️</div>
+      <div>
+        <h1>Beleef de Recreatiebranche</h1>
+        <p class="tag">Ontdek veel verschillende banen — in één korte ronde.</p>
+      </div>
+    </div>
+    <div class="hook-banner" role="img" aria-label="Speel 60 seconden, vind jouw rol">
+      <div class="hook-line">60s Quest • Kies, Match, Deel</div>
+    </div>
   </header>
 
   <main class="container">
     <section class="controls">
       <button id="startBtn" class="btn primary">Start</button>
-      <button id="teacherBtn" class="btn">Docentmodus</button>
+      <button id="teacherBtn" class="btn" aria-pressed="false">Docentmodus</button>
       <button id="bigScreenBtn" class="btn">Groot scherm</button>
       <button id="shareBtn" class="btn">Deel link</button>
+      <button id="seedBtn" class="btn" title="Vul demo-data (random)">Seed data</button>
+      <button id="supabaseBtn" class="btn" title="Configure Supabase sync">Configure Supabase</button>
     </section>
 
     <section id="hook" class="hook">
       <div class="hook-visual" aria-hidden="true">🧭</div>
       <div class="hook-text">
         <h2>Welke rol past bij jou?</h2>
-        <p>Speel één korte ronde (±60 sec). Laat je vrienden kijken — succes is deelbaar.</p>
+        <p class="hint">Tik start — kies 1 kaart — zie jouw match. Klaar? Deel het met je vrienden.</p>
       </div>
     </section>
 
-    <section id="game" class="game hidden">
-      <div id="timer" class="timer">00:45</div>
-      <div id="cards" class="cards"></div>
-      <div id="result" class="result hidden">
+    <section id="game" class="game hidden" aria-live="polite">
+      <div class="game-top">
+        <div id="timer" class="timer">00:45</div>
+        <div id="flowHint" class="flow-hint">Kies één kaart — geen scores, alleen match.</div>
+      </div>
+      <div id="cards" class="cards" role="list"></div>
+      <div id="result" class="result hidden" role="status">
         <h3 id="resultTitle"></h3>
         <p id="resultDesc"></p>
         <div class="result-actions">
