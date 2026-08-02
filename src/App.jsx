@@ -11,14 +11,13 @@ import { supabase } from './lib/supabase';
 export default function App() {
   const [lang, setLang] = useState('nl');
   const [selectedField, setSelectedField] = useState(null);
-  const [gameState, setGameState] = useState('selector'); // selector, dialogue, puzzle, success
+  const [gameState, setGameState] = useState('selector');
   const [dialogueIndex, setDialogueIndex] = useState(0);
   const [sessionId, setSessionId] = useState(null);
 
-  // Initialize anonymous session
   useEffect(() => {
     const initSession = async () => {
-      const { data, error } = await supabase
+      const { data } = await supabase
         .from('sessions')
         .insert([{ started_at: new Date() }])
         .select()
@@ -72,7 +71,6 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-dusk text-sand font-body flex flex-col relative overflow-hidden select-none">
-      {/* Top Navigation / Language Toggle */}
       <header className="w-full p-4 flex justify-between items-center z-10">
         {gameState !== 'selector' ? (
           <button
@@ -91,7 +89,6 @@ export default function App() {
         </button>
       </header>
 
-      {/* Main Content Area */}
       <main className="flex-1 flex flex-col items-center justify-center p-4 z-10">
         {gameState === 'selector' && (
           <FieldSelector fields={fields} lang={lang} onSelect={handleSelectField} />
@@ -112,7 +109,6 @@ export default function App() {
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-dusk2/80 backdrop-blur-sm">
             <div className="bg-sand p-6 sm:p-8 rounded-3xl w-full max-w-lg shadow-[0_16px_0_0_rgba(10,44,45,1)] border-4 border-dusk2 relative animate-fade-in-up">
               
-              {/* Header Section */}
               <div className="flex items-center gap-4 mb-6">
                 <div className="w-16 h-16 bg-sun rounded-full flex items-center justify-center text-4xl border-4 border-dusk2 shadow-[0_4px_0_0_rgba(10,44,45,1)]">
                   🥳
@@ -127,7 +123,6 @@ export default function App() {
                 </div>
               </div>
 
-              {/* Pesan Apresiasi */}
               <div className="bg-sun/20 border-2 border-sun p-4 rounded-xl w-full mb-6 relative">
                 <span className="absolute -top-4 -right-2 text-3xl bg-sand rounded-full">💡</span>
                 <p className="text-dusk2 font-medium font-body leading-relaxed">
@@ -135,7 +130,6 @@ export default function App() {
                 </p>
               </div>
 
-              {/* Bullet Points */}
               <div className="bg-[#F5ECE0] p-5 rounded-xl w-full mb-8 border-2 border-[#E5DCC0]">
                 <p className="font-bold text-dusk2 mb-3 text-sm font-display">
                   {lang === 'nl' ? 'Waarom dit leuk is:' : 'Kenapa ini seru:'}
@@ -150,12 +144,12 @@ export default function App() {
                 </ul>
               </div>
 
-              {/* Action Buttons (Tombol Perbaikan Hypertext/Link Eksternal) */}
               <div className="flex flex-col sm:flex-row gap-4 w-full mb-4">
                 <button
                   onClick={() => {
-                    const jobUrl = selectedField?.jobLink || `https://www.google.com/search?q=lowongan+kerja+${encodeURIComponent(selectedField.title[lang])}`;
-                    window.open(jobUrl, '_blank', 'noopener,noreferrer');
+                    // Paksa langsung search Google agar terhindar dari domain mati / NXDOMAIN
+                    const query = encodeURIComponent(`vacatures ${selectedField.title['nl'] || 'recreatie'}`);
+                    window.open(`https://www.google.com/search?q=${query}`, '_blank', 'noopener,noreferrer');
                   }}
                   className="flex-1 bg-coral text-white font-black py-4 px-4 rounded-xl border-4 border-dusk2 shadow-[0_6px_0_0_rgba(10,44,45,1)] hover:translate-y-1 hover:shadow-[0_2px_0_0_rgba(10,44,45,1)] transition-all flex items-center justify-center gap-2 cursor-pointer"
                 >
@@ -170,7 +164,6 @@ export default function App() {
                 </button>
               </div>
 
-              {/* Footer Text */}
               <p className="text-xs text-gray-400 text-center mt-6 font-medium">
                 {lang === 'nl' ? 'Vraag je docent of bezoek een recreatiepark voor de Open Dag!' : 'Tanyakan gurumu atau kunjungi taman rekreasi saat Open House!'}
               </p>
