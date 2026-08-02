@@ -1,171 +1,142 @@
-export const MENTOR = {
-  hospitality: { name: 'Kak Nara', color: '#FF6B4A', baseEmote: '💁‍♀️' },
-  teknik: { name: 'Om Bagas', color: '#4FB3BF', baseEmote: '👷‍♂️' },
-  marketing: { name: 'Kak Zea', color: '#FFC145', baseEmote: '👩‍💻' },
-  alam: { name: 'Kak Rio', color: '#5FA777', baseEmote: '🧗‍♂️' },
-};
-
-export const FIELDS = [
+export const fields = [
   {
     id: 'hospitality',
     title: {
-      nl: 'Gastvrijheid & Klantenservice',
-      id: 'Hospitality & Pelayanan Tamu'
+      nl: "Gastvrijheid & Klantenservice",
+      id: "Hospitality & Layanan Pelanggan"
     },
-    short: {
-      nl: 'Wees het gezicht dat hun vakantie onvergetelijk maakt.',
-      id: 'Jadi wajah pertama yang bikin liburan tamu berkesan.'
-    },
-    icon: '🏕️',
-    accent: '#FF6B4A',
-    intro: [
-      { m: 'hospitality', emote: '👋', t: { nl: 'Hallo! Ik ben Nara. Welkom bij de receptie!', id: 'Halo! Aku Nara. Selamat datang di meja depan!' } },
-      { m: 'hospitality', emote: '🤔', t: { nl: 'Elke gast heeft een ander verhaal en probleem.', id: 'Tiap tamu punya cerita dan masalah yang beda-beda.' } },
-      { m: 'hospitality', emote: '🤝', t: { nl: 'Koppel de situatie aan jouw actie. Er is geen fout, laat je instelling zien!', id: 'Pasangkan situasi dengan tindakanmu. Apapun pilihanmu, mari kita lihat insting melayanimu!' } },
-    ],
-    puzzle: {
-      type: 'matching',
-      instruction: {
-        nl: 'Kies een gast en kies jouw actie.',
-        id: 'Pilih situasi tamu, lalu ketuk tindakan yang akan kamu ambil.'
-      },
-      pairs: [
-        { left: { nl: 'Tent lekt door regen', id: 'Tenda keluarga bocor kena hujan' }, right: { nl: 'Geef reserve zeil', id: 'Pinjamkan terpal cadangan' } },
-        { left: { nl: 'Kind huilt, ouders kwijt', id: 'Anak menangis terpisah dari ortu' }, right: { nl: 'Bel de infobalie', id: 'Hubungi pos informasi' } },
-        { left: { nl: 'Vraagt naar middagschema', id: 'Tamu tanya jadwal aktivitas sore' }, right: { nl: 'Geef activiteitenbrochure', id: 'Bagikan brosur kegiatan' } },
-        { left: { nl: 'Geen wifi-signaal', id: 'Sinyal wifi tidak nyambung' }, right: { nl: 'Verwijs naar de kantine', id: 'Arahkan ke kantin utama' } },
+    puzzleType: 'hotspot',
+    jobLink: "https://www.google.com/search?q=vacatures+hospitality+recreatie",
+    dialogue: {
+      nl: [
+        "Welkom! In een recreatiepark is gastvrijheid het allerbelangrijkste.",
+        "Laten we eens kijken of jij de juiste plekken kunt aanwijzen waar gasten hulp nodig hebben!"
       ],
+      id: [
+        "Selamat datang! Di taman rekreasi, keramahan adalah hal yang paling utama.",
+        "Mari kita lihat apakah kamu bisa menemukan area di mana tamu membutuhkan bantuan!"
+      ]
     },
-    feedback: {
-      nl: 'Geweldig! In de hospitality draait alles om jouw unieke benadering om gasten blij te maken.',
-      id: 'Luar biasa! Di bidang hospitality, ketanggapanmu dan caramu bereaksi terhadap tamu adalah kunci. Tindakan yang kamu pilih menunjukkan bahwa melayani orang lain adalah sebuah seni dan keasyikan tersendiri!'
+    message: {
+      nl: "Geweldig! In de hospitality draait alles om jouw unieke benadering om gasten blij te maken.",
+      id: "Hebat! Dalam bidang hospitality, semuanya tentang pendekatan unikmu untuk membuat tamu bahagia."
     },
-    facts: {
-      nl: ['Ontmoet veel verschillende mensen', 'Traint probleemoplossend vermogen', 'Ideaal als bijbaan tijdens je studie'],
-      id: ['Bertemu ratusan tamu unik dari berbagai latar belakang', 'Melatih problem-solving super cepat', 'Bisa mulai dari part-time saat sekolah']
+    benefits: {
+      nl: [
+        "Ontmoet veel verschillende mensen",
+        "Traint probleemoplossend vermogen",
+        "Ideaal als bijbaan tijdens je studie"
+      ],
+      id: [
+        "Bertemu dengan banyak orang yang berbeda",
+        "Melatih kemampuan memecahkan masalah",
+        "Ideal sebagai pekerjaan sampingan saat kuliah"
+      ]
     }
   },
   {
-    id: 'teknik',
+    id: 'technical',
     title: {
-      nl: 'Techniek & Onderhoud',
-      id: 'Teknik & Pemeliharaan'
+      nl: "Technische Dienst & Veiligheid",
+      id: "Layanan Teknis & Keamanan"
     },
-    short: {
-      nl: 'Zorg dat alle faciliteiten elke dag veilig werken.',
-      id: 'Pastikan semua fasilitas aman dan berfungsi.'
+    puzzleType: 'matching',
+    jobLink: "https://www.google.com/search?q=technische+dienst+vacatures+attractiepark",
+    dialogue: {
+      nl: [
+        "Attracties moeten altijd veilig en feilloos werken.",
+        "De technische dienst zorgt ervoor dat alles op rolletjes loopt!"
+      ],
+      id: [
+        "Wahana harus selalu aman dan berfungsi dengan sempurna.",
+        "Tim teknis memastikan semuanya berjalan dengan lancar!"
+      ]
     },
-    icon: '🔧',
-    accent: '#4FB3BF',
-    intro: [
-      { m: 'teknik', emote: '👋', t: { nl: 'Yo! Ik ben Bagas van het technische team.', id: 'Yo! Aku Bagas, tim teknik di sini.' } },
-      { m: 'teknik', emote: '⚙️', t: { nl: 'Technicus zijn is logica en zorgvuldigheid.', id: 'Kerjaan teknisi itu separuh logika, separuh kehati-hatian.' } },
-      { m: 'teknik', emote: '⚡', t: { nl: 'Probeer de generatorstappen in jouw volgorde te zetten!', id: 'Coba susun langkah perbaikan genset sesuai nalurimu!' } },
-    ],
-    puzzle: {
-      type: 'sequence',
-      instruction: {
-        nl: 'Tik op de stappen in de volgorde die jij logisch vindt.',
-        id: 'Ketuk langkah-langkah berikut sesuai urutan yang menurutmu paling aman.'
-      },
-      steps: {
-        nl: [
-          'Schakel de hoofdschakelaar uit',
-          'Controleer op brandstoflekken',
-          'Reinig het luchtfilter',
-          'Zet de schakelaar weer aan'
-        ],
-        id: [
-          'Matikan saklar utama',
-          'Periksa kebocoran bahan bakar',
-          'Bersihkan filter udara',
-          'Nyalakan kembali saklar'
-        ]
-      }
+    message: {
+      nl: "Fantastisch! Zonder sterke techniek en veiligheidscontroles kan geen enkel park draaien.",
+      id: "Fantastis! Tanpa teknik yang kuat dan kontrol keselamatan, taman rekreasi tidak akan bisa beroperasi."
     },
-    feedback: {
-      nl: 'Goed geprobeerd! Elke monteur heeft zijn eigen ritme, zolang veiligheid voorop staat.',
-      id: 'Eksperimen yang bagus! Di dunia teknik, urutan logika sangat penting, namun keberanianmu merakit solusi menunjukkan insting seorang problem solver sejati. Mengutak-atik mesin itu seru, kan?'
-    },
-    facts: {
-      nl: ['Werken met elektriciteit, zwembaden en machines', 'Veiligheid (K3) is altijd prioriteit', 'Het hele jaar door veel vraag naar'],
-      id: ['Kerja dengan listrik, mesin, sampai wahana permainan', 'Selalu ada standar keselamatan (K3) yang ketat', 'Banyak dibutuhkan sepanjang tahun']
+    benefits: {
+      nl: [
+        "Werken met hippe en grote machines",
+        "Hoge technische verantwoordelijkheid",
+        "Scherpt je analytische skills aan"
+      ],
+      id: [
+        "Bekerja dengan mesin canggih dan besar",
+        "Tanggung jawab teknik yang tinggi",
+        "Mengasah kemampuan analitismu"
+      ]
     }
   },
   {
     id: 'marketing',
     title: {
-      nl: 'Evenementen, Marketing & Media',
-      id: 'Event, Marketing & Media'
+      nl: "Marketing & Evenementen",
+      id: "Marketing & Acara"
     },
-    short: {
-      nl: 'Creëer verhalen die mensen willen laten bezoeken.',
-      id: 'Ciptakan cerita yang bikin orang pengen datang berkunjung.'
+    puzzleType: 'sequence',
+    jobLink: "https://www.google.com/search?q=marketing+evenementen+vacatures+recreatie",
+    dialogue: {
+      nl: [
+        "Hoe zorg je ervoor dat duizenden bezoekers naar het park komen?",
+        "Juist, door gave evenementen en slimme promotie te plannen!"
+      ],
+      id: [
+        "Bagaimana cara memastikan ribuan pengunjung datang ke taman rekreasi?",
+        "Tentu saja dengan merencanakan acara keren dan promosi cerdas!"
+      ]
     },
-    icon: '📸',
-    accent: '#FFC145',
-    intro: [
-      { m: 'marketing', emote: '✨', t: { nl: 'Hoi! Ik ben Zea, ik doe de content en evenementen hier.', id: 'Hai! Aku Zea, aku pegang konten & event di taman rekreasi ini.' } },
-      { m: 'marketing', emote: '📱', t: { nl: 'Deze week hebben we een promo nodig, maar mijn tekst is een puinhoop!', id: 'Minggu ini kita mau posting promo. Tapi draf kata-kataku masih berantakan!' } },
-      { m: 'marketing', emote: '💡', t: { nl: 'Help me de woorden in een pakkende zin te zetten.', id: 'Bantu susun ulang kata-katanya jadi kalimat promosi yang kece, yuk.' } },
-    ],
-    puzzle: {
-      type: 'wordorder',
-      instruction: {
-        nl: 'Tik op de woorden op volgorde om een goede promo-zin te maken.',
-        id: 'Ketuk kata-kata di bawah secara berurutan supaya membentuk kalimat promosi.'
-      },
-      target: {
-        nl: 'Spannende vakanties, onvergetelijke herinneringen, alleen hier!',
-        id: 'Liburan seru, kenangan tak terlupakan, hanya di sini!'
-      }
+    message: {
+      nl: "Heel goed! Jij weet precies hoe je een evenement van A tot Z opbouwt en publiek trekt.",
+      id: "Bagus sekali! Kamu tahu persis cara membangun sebuah acara dari awal hingga akhir untuk menarik penonton."
     },
-    feedback: {
-      nl: 'Perfect! Met de juiste woorden kun je honderden mensen nieuwsgierig maken. Jouw creativiteit is de sleutel tot succes in marketing!',
-      id: 'Sip, captionnya siap posting! Merangkai kata itu sangat asyik. Pilihan katamu bisa bikin ratusan orang penasaran dan langsung ingin datang liburan kemari!'
-    },
-    facts: {
-      nl: ['Beheer sociale media, foto\'s en video\'s', 'Nauw samenwerken met alle andere afdelingen', 'Je creativiteit wordt door duizenden gezien'],
-      id: ['Mengelola media sosial, foto, video, sampai event', 'Kerja sama erat dengan semua divisi lain', 'Kreativitasmu langsung dilihat ribuan orang']
+    benefits: {
+      nl: [
+        "Creatief en dynamisch bezig zijn",
+        "Contact met media en grote doelgroepen",
+        "Zie direct het resultaat van je campagne"
+      ],
+      id: [
+        "Bekerja secara kreatif dan dinamis",
+        "Berinteraksi dengan media dan target audiens luas",
+        "Melihat langsung hasil dari kampanye yang dibuat"
+      ]
     }
   },
   {
-    id: 'alam',
+    id: 'nature',
     title: {
-      nl: 'Natuur & Veiligheid',
-      id: 'Alam, Aktivitas & Keselamatan'
+      nl: "Groenvoorziening & Outdoor",
+      id: "Pertamanan & Luar Ruangan"
     },
-    short: {
-      nl: 'Houd gasten veilig tijdens spannende natuuractiviteiten.',
-      id: 'Jaga pengunjung tetap aman saat seru-seruan di alam.'
+    puzzleType: 'wordorder',
+    jobLink: "https://www.google.com/search?q=groenvoorziening+outdoor+vacatures+park",
+    dialogue: {
+      nl: [
+        "Een mooi park valt of staat met prachtig groen en schone buitenruimtes.",
+        "Laten we de juiste termen op de goede plek zetten!"
+      ],
+      id: [
+        "Sebuah taman yang indah ditentukan oleh lanskap hijau dan area luar ruangan yang bersih.",
+        "Mari susun kata-kata kunci ini dengan benar!"
+      ]
     },
-    icon: '🧗‍♂️',
-    accent: '#5FA777',
-    intro: [
-      { m: 'alam', emote: '🌿', t: { nl: 'Hé! Ik ben Rio, de outdoor gids. Veiligheid komt altijd eerst.', id: 'Hei! Aku Rio, pemandu aktivitas luar ruang. Sebelum mulai, aku wajib cek area.' } },
-      { m: 'alam', emote: '👀', t: { nl: 'Een scherp oog is cruciaal; één gemist gevaar kan groot uitpakken.', id: 'Mata yang jeli itu penting banget. Satu bahaya yang terlewat bisa berakibat fatal.' } },
-      { m: 'alam', emote: '🔍', t: { nl: 'Laten we de rivier checken. Zoek de 3 gevaren!', id: 'Yuk, bantu aku cek area sungai ini. Temukan 3 potensi bahaya!' } },
-    ],
-    puzzle: {
-      type: 'hotspot',
-      instruction: {
-        nl: 'Tik op 3 plekken die je gevaarlijk lijken in dit gebied.',
-        id: 'Ketuk 3 titik yang menurutmu berbahaya di area sungai ini.'
-      }
+    message: {
+      nl: "Uitstekend! Groen en natuur zorgen voor de ultieme ontspanning en beleving in het park.",
+      id: "Luar biasa! Area hijau dan alam menciptakan relaksasi serta pengalaman terbaik di taman rekreasi."
     },
-    feedback: {
-      nl: 'Goed gedaan, het gebied is veilig! Als je van buiten zijn houdt en om anderen geeft, is dit jouw plek.',
-      id: 'Area sudah aman! Insting perlindunganmu sangat bagus. Menjaga keselamatan orang lain sambil bekerja di alam terbuka itu sebuah panggilan jiwa yang luar biasa!'
-    },
-    facts: {
-      nl: ['Gids voor wandelen, kajakken en klimmen', 'Certificering voor EHBO en veiligheid vereist', 'Werken in de buitenlucht, weg van een bureau'],
-      id: ['Memandu aktivitas outdoor: hiking, kayak, panjat tebing', 'Punya sertifikasi keselamatan & pertolongan pertama', 'Kerja murni di alam terbuka, jauh dari meja kantor']
+    benefits: {
+      nl: [
+        "Lekker veel buiten in de frisse lucht",
+        "Direct zichtbaar en mooi resultaat",
+        "Belangrijk voor duurzaamheid en eco"
+      ],
+      id: [
+        "Banyak beraktivitas di luar ruangan yang segar",
+        "Hasil kerja yang langsung terlihat indah",
+        "Penting untuk keberlanjutan lingkungan dan ekologi"
+      ]
     }
   }
 ];
-
-export const VACANCY_URL = 'https://werkeninrecreatie.nl';
-export const OPEN_DAY_INFO = {
-  nl: 'Vraag je docent of bezoek een recreatiepark voor de Open Dag!',
-  id: 'Tanya guru atau kunjungi taman rekreasi terdekat untuk info Open Day!'
-};
