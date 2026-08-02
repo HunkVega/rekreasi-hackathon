@@ -1,150 +1,184 @@
-import { useMemo, useState } from 'react'
-import FieldSelector from './components/FieldSelector.jsx'
-import DialogueBox from './components/DialogueBox.jsx'
-import MatchingPuzzle from './components/puzzles/MatchingPuzzle.jsx'
-import SequencePuzzle from './components/puzzles/SequencePuzzle.jsx'
-import WordOrderPuzzle from './components/puzzles/WordOrderPuzzle.jsx'
-import HotspotPuzzle from './components/puzzles/HotspotPuzzle.jsx'
-import { FIELDS, VACANCY_URL, OPEN_DAY_INFO } from './data/fields.js'
-import { supabase } from './lib/supabase.js' // Pastikan file ini sudah ada
-
-const PUZZLE_COMPONENTS = {
-  matching: MatchingPuzzle,
-  sequence: SequencePuzzle,
-  wordorder: WordOrderPuzzle,
-  hotspot: HotspotPuzzle,
-}
+import React, { useState, useEffect } from 'react';
+import FieldSelector from './components/FieldSelector';
+import DialogueBox from './components/DialogueBox';
+import HotspotPuzzle from './components/puzzles/HotspotPuzzle';
+import MatchingPuzzle from './components/puzzles/MatchingPuzzle';
+import SequencePuzzle from './components/puzzles/SequencePuzzle';
+import WordOrderPuzzle from './components/puzzles/WordOrderPuzzle';
+import { fields } from './data/fields';
+import { supabase } from './lib/supabase';
 
 export default function App() {
-  const [lang, setLang] = useState('nl') // Bahasa Utama
-  const [screen, setScreen] = useState('select') 
-  const [currentId, setCurrentId] = useState(null)
-  const [completed, setCompleted] = useState([])
-  const [userAnswers, setUserAnswers] = useState(null)
+  const [lang, setLang] = useState('nl');
+  const [selectedField, setSelectedField] = useState(null);
+  const [gameState, setGameState] = useState('selector'); // selector, dialogue, puzzle, success
+  const [dialogueIndex, setDialogueIndex] = useState(0);
+  const [sessionId, setSessionId] = useState(null);
 
-  const field = useMemo(() => FIELDS.find((f) => f.id === currentId) || null, [currentId])
+  // Initialize anonymous session
+  useEffect(() => {
+    const initSession = async () => {
+      const { data, error } = await supabase
+        .from('sessions')
+        .insert([{ started_at: new Date() }])
+        .select()
+        .single();
+      
+      if (data) {
+        setSessionId(data.id);
+      }
+    };
+    initSession();
+  }, []);
 
-  const startField = (id) => {
-    setCurrentId(id)
-    setScreen('intro')
-  }
+  const handleSelectField = (field) => {
+    setSelectedField(field);
+    setGameState('dialogue');
+    setDialogueIndex(0);
+  };
 
-  const backToSelect = () => {
-    setScreen('select')
-    setCurrentId(null)
-    setUserAnswers(null)
-  }
+  const handleNextDialogue = () => {
+    if (selectedField && dialogueIndex < selectedField.dialogue[lang].length - 1) {
+      setDialogueIndex(prev => prev + 1);
+    } else {
+      setGameState('puzzle');
+    }
+  };
 
-  const finishField = async (answers) => {
-    // Simpan ke Supabase di background, tidak memblokir UI
-    const { error } = await supabase
-      .from('user_progress')
-      .insert([{ field_id: currentId, answers: answers }])
-    
-    if (error) console.error('Gagal menyimpan:', error)
+  const handlePuzzleComplete = async () => {
+    setGameState('success');
+    if (sessionId && selectedField) {
+      await supabase
+        .from('progress')
+        .insert([{ session_id: sessionId, field_id: selectedField.id, completed: true }]);
+    }
+  };
 
-    setUserAnswers(answers)
-    setCompleted((c) => (c.includes(currentId) ? c : [...c, currentId]))
-    setScreen('reflection')
-  }
-
-  const PuzzleComp = field ? PUZZLE_COMPONENTS[field.puzzle.type] : null
+  const renderPuzzle = () => {
+    if (!selectedField) return null;
+    switch (selectedField.puzzleType) {
+      case 'hotspot':
+        return <HotspotPuzzle field={selectedField} lang={lang} onComplete={handlePuzzleComplete} />;
+      case 'matching':
+        return <MatchingPuzzle field={selectedField} lang={lang} onComplete={handlePuzzleComplete} />;
+      case 'sequence':
+        return <SequencePuzzle field={selectedField} lang={lang} onComplete={handlePuzzleComplete} />;
+      case 'wordorder':
+        return <WordOrderPuzzle field={selectedField} lang={lang} onComplete={handlePuzzleComplete} />;
+      default:
+        return <HotspotPuzzle field={selectedField} lang={lang} onComplete={handlePuzzleComplete} />;
+    }
+  };
 
   return (
-    <div className="min-h-screen w-full bg-dusk flex flex-col relative overflow-hidden">
-      <div className="pointer-events-none absolute -top-16 -right-16 w-64 h-64 rounded-full bg-sun/10 animate-floaty" />
-      <div className="pointer-events-none absolute -bottom-20 -left-10 w-72 h-72 rounded-full bg-coral/10 animate-floaty" style={{ animationDelay: '1.2s' }} />
-      
-      {/* Toggle Bahasa Dinamis */}
-      <div className="absolute top-4 right-4 z-50">
-        <button 
-          onClick={() => setLang(lang === 'nl' ? 'id' : 'nl')}
-          className="bg-sand text-dusk2 font-display font-black px-4 py-2 rounded-xl chunky-border text-sm hover:bg-sun transition-colors shadow-[0_4px_0_0_rgba(10,44,45,1)] active:translate-y-1 active:shadow-none"
-        >
-          {lang === 'nl' ? '🇳🇱 NL' : '🇮🇩 ID'}
-        </button>
-      </div>
+    <div className="min-h-screen bg-dusk text-sand font-body flex flex-col relative overflow-hidden select-none">
+      {/* Top Navigation / Language Toggle */}
+      <header className="w-full p-4 flex justify-between items-center z-10">
+        {gameState !== 'selector' ? (
+          <button
+            onClick={() => { setGameState('selector'); setSelectedField(null); }}
+            className="bg-sand text-dusk font-black px-4 py-2 rounded-xl border-2 border-dusk2 shadow-[0_4px_0_0_rgba(10,44,45,1)] hover:translate-y-0.5 transition-all text-sm uppercase tracking-wider"
+          >
+            {lang === 'nl' ? 'Terug' : 'Kembali'}
+          </button>
+        ) : <div />}
 
-      {screen !== 'select' && field && (
-        <TopBar field={field} onBack={backToSelect} step={screen} lang={lang} />
-      )}
-      
-      <main className="flex-1 flex flex-col relative z-10">
-        {screen === 'select' && (
-          <FieldSelector completed={completed} onStart={startField} lang={lang} />
+        <button
+          onClick={() => setLang(l => l === 'nl' ? 'id' : 'nl')}
+          className="bg-sand text-dusk font-black px-4 py-2 rounded-xl border-2 border-dusk2 shadow-[0_4px_0_0_rgba(10,44,45,1)] hover:translate-y-0.5 transition-all text-sm uppercase"
+        >
+          {lang === 'nl' ? 'NL 🇳🇱' : 'ID 🇮🇩'}
+        </button>
+      </header>
+
+      {/* Main Content Area */}
+      <main className="flex-1 flex flex-col items-center justify-center p-4 z-10">
+        {gameState === 'selector' && (
+          <FieldSelector fields={fields} lang={lang} onSelect={handleSelectField} />
         )}
-        {screen === 'intro' && field && (
-          <DialogueBox key={`${field.id}-intro`} lines={field.intro} accent={field.accent} onDone={() => setScreen('puzzle')} lang={lang} />
+
+        {gameState === 'dialogue' && selectedField && (
+          <DialogueBox
+            field={selectedField}
+            lang={lang}
+            dialogueIndex={dialogueIndex}
+            onNext={handleNextDialogue}
+          />
         )}
-        {screen === 'puzzle' && field && PuzzleComp && (
-          <PuzzleComp config={field.puzzle} accent={field.accent} onComplete={finishField} lang={lang} />
-        )}
-        {screen === 'reflection' && field && (
-          <ReflectionScreen field={field} answers={userAnswers} onBack={backToSelect} lang={lang} />
+
+        {gameState === 'puzzle' && renderPuzzle()}
+
+        {gameState === 'success' && selectedField && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-dusk2/80 backdrop-blur-sm">
+            <div className="bg-sand p-6 sm:p-8 rounded-3xl w-full max-w-lg shadow-[0_16px_0_0_rgba(10,44,45,1)] border-4 border-dusk2 relative animate-fade-in-up">
+              
+              {/* Header Section */}
+              <div className="flex items-center gap-4 mb-6">
+                <div className="w-16 h-16 bg-sun rounded-full flex items-center justify-center text-4xl border-4 border-dusk2 shadow-[0_4px_0_0_rgba(10,44,45,1)]">
+                  🥳
+                </div>
+                <div>
+                  <h2 className="text-2xl sm:text-3xl font-black text-dusk2 font-display">
+                    {lang === 'nl' ? 'Missie Voltooid!' : 'Misi Selesai!'}
+                  </h2>
+                  <p className="text-sm font-bold text-gray-500 uppercase tracking-widest">
+                    {selectedField.title[lang]}
+                  </p>
+                </div>
+              </div>
+
+              {/* Pesan Apresiasi */}
+              <div className="bg-sun/20 border-2 border-sun p-4 rounded-xl w-full mb-6 relative">
+                <span className="absolute -top-4 -right-2 text-3xl bg-sand rounded-full">💡</span>
+                <p className="text-dusk2 font-medium font-body leading-relaxed">
+                  {selectedField.message[lang]}
+                </p>
+              </div>
+
+              {/* Bullet Points */}
+              <div className="bg-[#F5ECE0] p-5 rounded-xl w-full mb-8 border-2 border-[#E5DCC0]">
+                <p className="font-bold text-dusk2 mb-3 text-sm font-display">
+                  {lang === 'nl' ? 'Waarom dit leuk is:' : 'Kenapa ini seru:'}
+                </p>
+                <ul className="space-y-3">
+                  {selectedField.benefits[lang].map((item, index) => (
+                    <li key={index} className="flex gap-3 text-dusk2 text-sm font-body items-start">
+                      <span className="text-coral text-lg leading-none">★</span>
+                      <span className="leading-tight">{item}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              {/* Action Buttons (Tombol Perbaikan Hypertext/Link Eksternal) */}
+              <div className="flex flex-col sm:flex-row gap-4 w-full mb-4">
+                <button
+                  onClick={() => {
+                    const jobUrl = selectedField?.jobLink || `https://www.google.com/search?q=lowongan+kerja+${encodeURIComponent(selectedField.title[lang])}`;
+                    window.open(jobUrl, '_blank', 'noopener,noreferrer');
+                  }}
+                  className="flex-1 bg-coral text-white font-black py-4 px-4 rounded-xl border-4 border-dusk2 shadow-[0_6px_0_0_rgba(10,44,45,1)] hover:translate-y-1 hover:shadow-[0_2px_0_0_rgba(10,44,45,1)] transition-all flex items-center justify-center gap-2 cursor-pointer"
+                >
+                  {lang === 'nl' ? 'Bekijk Vacatures 🎯' : 'Lihat Lowongan 🎯'}
+                </button>
+                
+                <button
+                  onClick={() => { setGameState('selector'); setSelectedField(null); }}
+                  className="flex-1 bg-dusk2 text-white font-black py-4 px-4 rounded-xl border-4 border-dusk2 shadow-[0_6px_0_0_rgba(10,44,45,1)] hover:translate-y-1 hover:shadow-[0_2px_0_0_rgba(10,44,45,1)] transition-all flex items-center justify-center gap-2 cursor-pointer"
+                >
+                  {lang === 'nl' ? 'Ander Gebied 🗺️' : 'Bidang Lain 🗺️'}
+                </button>
+              </div>
+
+              {/* Footer Text */}
+              <p className="text-xs text-gray-400 text-center mt-6 font-medium">
+                {lang === 'nl' ? 'Vraag je docent of bezoek een recreatiepark voor de Open Dag!' : 'Tanyakan gurumu atau kunjungi taman rekreasi saat Open House!'}
+              </p>
+
+            </div>
+          </div>
         )}
       </main>
     </div>
-  )
-}
-
-function TopBar({ field, onBack, step, lang }) {
-  const stepLabel = { intro: '💬', puzzle: '🧩', reflection: '✨' }[step]
-  return (
-    <div className="relative z-10 flex items-center justify-between px-4 sm:px-8 pt-4 sm:pt-6">
-      <button onClick={onBack} className="font-display font-bold text-xs sm:text-sm text-sand/70 hover:text-sand flex items-center gap-1 bg-white/5 hover:bg-white/10 px-3 py-1.5 rounded-full transition-colors">
-        {lang === 'nl' ? 'Terug' : 'Kembali'}
-      </button>
-      <span className="font-display font-black text-xs sm:text-sm px-4 py-2 rounded-xl text-dusk2 chunky-border shadow-[0_4px_0_0_rgba(10,44,45,1)]" style={{ backgroundColor: field.accent }}>
-        {field.icon} {field.title[lang]} {stepLabel}
-      </span>
-    </div>
-  )
-}
-
-function ReflectionScreen({ field, onBack, lang }) {
-  return (
-    <div className="w-full h-full flex flex-col items-center justify-center px-4 sm:px-8 py-8 overflow-y-auto scrollbar-thin">
-      <div className="w-full max-w-xl bg-sand chunky-border rounded-3xl p-6 sm:p-8 animate-popin shadow-[0_12px_0_0_rgba(10,44,45,1)]">
-        
-        <div className="flex items-center gap-4 mb-4 border-b-4 border-dusk2/10 pb-4">
-          <span className="text-5xl sm:text-6xl animate-floaty">🥳</span>
-          <div>
-            <p className="font-display font-black text-2xl sm:text-3xl text-ink leading-tight">
-              {lang === 'nl' ? 'Missie Voltooid!' : 'Eksplorasi Selesai!'}
-            </p>
-            <p className="text-ink/60 font-bold tracking-widest uppercase text-xs mt-1">{field.title[lang]}</p>
-          </div>
-        </div>
-        
-        {/* Pesan Edukatif Berbasis Afirmasi */}
-        <div className="bg-sun/20 p-5 rounded-2xl border-4 border-sun mb-6 relative">
-          <span className="absolute -top-4 -right-3 text-3xl rotate-12">💡</span>
-          <p className="font-body text-ink text-sm sm:text-base leading-relaxed font-semibold">
-            {field.feedback[lang]}
-          </p>
-        </div>
-
-        <div className="bg-dusk2/5 rounded-2xl p-4 my-4 border-2 border-dusk2/10">
-          <p className="font-display font-black text-ink text-sm mb-3">{lang === 'nl' ? 'Waarom dit leuk is:' : 'Fakta seru bidang ini:'}</p>
-          <ul className="space-y-2">
-            {field.facts[lang].map((f, i) => (
-              <li key={i} className="text-ink/80 text-sm flex items-start gap-3 font-medium">
-                <span className="text-coral font-black text-lg leading-none">★</span> <span>{f}</span>
-              </li>
-            ))}
-          </ul>
-        </div>
-
-        <div className="flex flex-col sm:flex-row gap-3 mt-6">
-          <a href={VACANCY_URL} target="_blank" rel="noreferrer" className="flex-1 text-center font-display font-black text-sm bg-coral text-sand px-4 py-4 rounded-xl chunky-border shadow-[0_6px_0_0_rgba(10,44,45,1)] active:translate-y-1 active:shadow-none transition-all">
-            {lang === 'nl' ? 'Bekijk Vacatures' : 'Lihat Lowongan'} 🚀
-          </a>
-          <button onClick={onBack} className="flex-1 text-center font-display font-black text-sm bg-dusk2 text-sand px-4 py-4 rounded-xl chunky-border shadow-[0_6px_0_0_rgba(10,44,45,1)] active:translate-y-1 active:shadow-none transition-all">
-            {lang === 'nl' ? 'Ander Gebied' : 'Jelajahi Lainnya'} 🗺️
-          </button>
-        </div>
-        <p className="text-center text-ink/40 font-bold text-[11px] sm:text-xs mt-6">{OPEN_DAY_INFO[lang]}</p>
-      </div>
-    </div>
-  )
+  );
 }
